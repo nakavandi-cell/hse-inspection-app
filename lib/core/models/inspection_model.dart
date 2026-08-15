@@ -1,70 +1,29 @@
 class InspectionModel {
   final int? id;
-  final int equipmentId;
   final String checklistId;
-  final String inspectorName;
-  final String inspectionDate; // ISO
-  final InspectionStatus status;
-  final String? notes;
-  final String? createdAt;
-  final String? updatedAt;
+  final String sectionKey;
+  final String title;
+  final String status;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
 
-  InspectionModel({
+  const InspectionModel({
     this.id,
-    required this.equipmentId,
     required this.checklistId,
-    required this.inspectorName,
-    required this.inspectionDate,
+    required this.sectionKey,
+    required this.title,
     required this.status,
-    this.notes,
-    this.createdAt,
-    this.updatedAt,
+    this.startedAt,
+    this.completedAt,
   });
 
   Map<String, dynamic> toMap() => {
-        'id': id,
-        'equipment_id': equipmentId,
+        if (id != null) 'id': id,
         'checklist_id': checklistId,
-        'inspector_name': inspectorName,
-        'inspection_date': inspectionDate,
-        'status': status.value,
-        'notes': notes,
-        'created_at': createdAt,
-        'updated_at': updatedAt,
+        'section_key': sectionKey,
+        'title': title,
+        'status': status,
+        'started_at': startedAt?.toIso8601String(),
+        'completed_at': completedAt?.toIso8601String(),
       };
-
-  factory InspectionModel.fromMap(Map<String, dynamic> map) => InspectionModel(
-        id: map['id'] as int?,
-        equipmentId: map['equipment_id'] as int,
-        checklistId: map['checklist_id'] as String,
-        inspectorName: map['inspector_name'] as String,
-        inspectionDate: map['inspection_date'] as String,
-        status: InspectionStatus.fromValue(map['status'] as String),
-        notes: map['notes'] as String?,
-        createdAt: map['created_at'] as String?,
-        updatedAt: map['updated_at'] as String?,
-      );
-
-  InspectionModel copyWith({
-    int? id,
-    int? equipmentId,
-    String? checklistId,
-    String? inspectorName,
-    String? inspectionDate,
-    InspectionStatus? status,
-    String? notes,
-    String? createdAt,
-    String? updatedAt,
-  }) =>
-      InspectionModel(
-        id: id ?? this.id,
-        equipmentId: equipmentId ?? this.equipmentId,
-        checklistId: checklistId ?? this.checklistId,
-        inspectorName: inspectorName ?? this.inspectorName,
-        inspectionDate: inspectionDate ?? this.inspectionDate,
-        status: status ?? this.status,
-        notes: notes ?? this.notes,
-        createdAt: createdAt ?? this.createdAt,
-        updatedAt: updatedAt ?? this.updatedAt,
-      );
 }
