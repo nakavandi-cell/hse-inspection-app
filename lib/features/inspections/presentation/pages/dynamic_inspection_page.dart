@@ -24,11 +24,13 @@ const _yesPartialNoOptions = <Map<String, String>>[
 class DynamicInspectionPage extends ConsumerStatefulWidget {
   final String sectionKey;
   final String sectionTitle;
+  final int? inspectionId;
 
   const DynamicInspectionPage({
     super.key,
     required this.sectionKey,
     required this.sectionTitle,
+    this.inspectionId,
   });
 
   @override
@@ -40,7 +42,48 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
   final Map<String, String> _answers = {};
   final Map<String, TextEditingController> _noteControllers = {};
   final Map<String, TextEditingController> _actionControllers = {};
+  InspectionModel? _originalInspection;
+  bool _loadingAnswers = false;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final id = widget.inspectionId;
+    if (id != null) {
+      _loadingAnswers = true;
+      Future.microtask(() async {
+        try {
+          final inspection =
+              await ref.read(inspectionProvider(id).future);
+          final answers =
+              await ref.read(inspectionAnswersProvider(id).future);
+          if (!mounted) return;
+          setState(() {
+            _originalInspection = inspection;
+            _applyAnswers(answers);
+            _loadingAnswers = false;
+          });
+        } catch (_) {
+          if (mounted) setState(() => _loadingAnswers = false);
+        }
+      });
+    }
+  }
+
+  void _applyAnswers(List<AnswerModel> answers) {
+    for (final a in answers) {
+      _answers[a.questionId] = a.answer;
+      _noteControllers.putIfAbsent(
+        a.questionId,
+        () => TextEditingController(text: a.note),
+      );
+      _actionControllers.putIfAbsent(
+        a.questionId,
+        () => TextEditingController(text: a.correctiveAction),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -63,8 +106,10 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
       type == 'yes_partial_no' ? _yesPartialNoOptions : _yesNoOptions;
 
   Future<void> _save({required bool asDraft}) async {
-    final asyncValue = ref.read(checklistByKeyProvider(widget.sectionKey));
-    final checklist = asyncValue.valueOrNull;
+    if (_loadingAnswers || _saving) return;
+
+    final checklist =
+        ref.read(checklistByKeyProvider(widget.sectionKey)).valueOrNull;
     if (checklist == null) return;
 
     final missing = checklist.questions
@@ -84,19 +129,22 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
 
     final now = DateTime.now();
     final inspection = InspectionModel(
+      id: widget.inspectionId,
       checklistId: checklist.id,
       sectionKey: widget.sectionKey,
       title: widget.sectionTitle,
       status: asDraft
-          ? InspectionStatus.draft.dbValue
+          ? (widget.inspectionId == null
+              ? InspectionStatus.draft.dbValue
+              : InspectionStatus.inProgress.dbValue)
           : InspectionStatus.completed.dbValue,
-      startedAt: now,
+      startedAt: _originalInspection?.startedAt ?? now,
       completedAt: asDraft ? null : now,
     );
 
     final answers = checklist.questions.map((q) {
       return AnswerModel(
-        inspectionId: 0, // داخل ریپازیتوری با id واقعی جایگزین می‌شود
+        inspectionId: 0,
         questionId: q.id,
         answer: _answers[q.id] ?? 'na',
         note: _cleanText(_noteControllers[q.id]?.text),
@@ -186,7 +234,9 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: _saving ? null : () => _save(asDraft: true),
+                onPressed: (_saving || _loadingAnswers)
+                    ? null
+                    : () => _save(asDraft: true),
                 child: const Text('ذخیره پیش‌نویس'),
               ),
             ),
@@ -194,7 +244,9 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
             Expanded(
               flex: 2,
               child: FilledButton(
-                onPressed: _saving ? null : () => _save(asDraft: false),
+                onPressed: (_saving || _loadingAnswers)
+                    ? null
+                    : () => _save(asDraft: false),
                 child: _saving
                     ? const SizedBox(
                         width: 20,
