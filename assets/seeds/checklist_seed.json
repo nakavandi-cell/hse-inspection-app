@@ -1,0 +1,140 @@
+[
+  {
+    "id": "firebox",
+    "title": "بازرسی فایرباکس",
+    "category": "ایمنی حریق",
+    "code": "HSE-6-022V1",
+    "version": "V1",
+    "questions": [
+      {
+        "id": "fb_01",
+        "text": "آیا فایرباکس در محل مناسب نصب شده و دسترسی به آن آزاد است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_02",
+        "text": "آیا درب فایرباکس سالم و بدون آسیب است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_03",
+        "text": "آیا شلنگ آتش‌نشانی سالم، بدون ترک و پوسیدگی است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_04",
+        "text": "آیا نازل یا سرلوله سالم و آماده استفاده است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_05",
+        "text": "آیا قرقره و اتصالات سالم و بدون نشتی هستند؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_06",
+        "text": "آیا فشار آب و شرایط عملکردی مناسب است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_07",
+        "text": "آیا برچسب یا کد شناسایی فایرباکس وجود دارد؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_08",
+        "text": "آیا علائم و نشانه‌های ایمنی مرتبط نصب شده‌اند؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_09",
+        "text": "آیا داخل فایرباکس تمیز و عاری از مانع است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "fb_10",
+        "text": "آیا شواهدی از خرابی، زنگ‌زدگی یا دستکاری غیرمجاز وجود ندارد؟",
+        "type": "yes_no",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "extinguisher",
+    "title": "بازرسی کپسول‌های آتش‌نشانی",
+    "category": "ایمنی حریق",
+    "code": "AUTO",
+    "version": "V1",
+    "questions": [
+      {
+        "id": "ex_01",
+        "text": "کپسول در محل تعیین‌شده نصب است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_02",
+        "text": "دسترسی به کپسول بدون مانع است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_03",
+        "text": "عقربه فشارسنج در محدوده مجاز قرار دارد؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_04",
+        "text": "پین ضامن و پلمپ سالم است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_05",
+        "text": "بدنه فاقد خوردگی، ضربه یا نشتی است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_06",
+        "text": "شلنگ و نازل سالم و بدون انسداد است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_07",
+        "text": "برچسب بازرسی ماهانه نصب و به‌روز است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_08",
+        "text": "دستورالعمل استفاده روی بدنه خوانا است؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_09",
+        "text": "نوع کپسول با کاربری محل همخوانی دارد؟",
+        "type": "yes_no",
+        "required": true
+      },
+      {
+        "id": "ex_10",
+        "text": "وضعیت وزن/محتوا مناسب است؟",
+        "type": "yes_no",
+        "required": true
+      }
+    ]
+  }
+]
