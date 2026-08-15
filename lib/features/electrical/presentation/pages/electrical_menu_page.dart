@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ElectricalMenuPage extends StatelessWidget {
   const ElectricalMenuPage({super.key});
@@ -7,21 +8,25 @@ class ElectricalMenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final sections = <ElectricalSectionItem>[
       const ElectricalSectionItem(
+        keyName: 'electrical_general',
         title: 'برق عمومی',
         subtitle: 'بررسی شرایط عمومی ایمنی برق در محیط',
         icon: Icons.bolt,
       ),
       const ElectricalSectionItem(
+        keyName: 'electrical_panels',
         title: 'تابلوهای برق',
         subtitle: 'بازرسی تابلوهای توزیع و حفاظتی',
         icon: Icons.electrical_services,
       ),
       const ElectricalSectionItem(
+        keyName: 'electrical_substations',
         title: 'تابلوهای پست برق',
         subtitle: 'بازرسی تابلوها و شرایط ایمنی پست',
         icon: Icons.settings_input_component,
       ),
       const ElectricalSectionItem(
+        keyName: 'portable_electrical_devices',
         title: 'وسایل برقی پرتابل',
         subtitle: 'کنترل کابل، دوشاخه، بدنه و ایمنی تجهیزات قابل حمل',
         icon: Icons.power,
@@ -73,10 +78,8 @@ class ElectricalMenuPage extends StatelessWidget {
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('بخش "${item.title}" در مرحله بعد متصل می‌شود.'),
-                    ),
+                  context.push(
+                    '/inspection/${item.keyName}?title=${Uri.encodeComponent(item.title)}',
                   );
                 },
               ),
@@ -89,11 +92,13 @@ class ElectricalMenuPage extends StatelessWidget {
 }
 
 class ElectricalSectionItem {
+  final String keyName;
   final String title;
   final String subtitle;
   final IconData icon;
 
   const ElectricalSectionItem({
+    required this.keyName,
     required this.title,
     required this.subtitle,
     required this.icon,
