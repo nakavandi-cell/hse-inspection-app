@@ -1,37 +1,27 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../db/app_database.dart';
 import '../models/checklist_model.dart';
-import '../models/equipment_model.dart';
-import '../models/inspection_model.dart';
 import '../repositories/checklist_repository.dart';
-import '../repositories/equipment_repository.dart';
 import '../repositories/inspection_repository.dart';
 
-final checklistRepositoryProvider = Provider<ChecklistRepository>((ref) {
-  return ChecklistRepository();
-});
+final appDatabaseProvider = Provider<AppDatabase>(
+  (ref) => AppDatabase.instance,
+);
 
-final equipmentRepositoryProvider = Provider<EquipmentRepository>((ref) {
-  return EquipmentRepository();
-});
+final checklistRepositoryProvider = Provider<ChecklistRepository>(
+  (ref) => ChecklistRepository(ref.watch(appDatabaseProvider)),
+);
 
-final inspectionRepositoryProvider = Provider<InspectionRepository>((ref) {
-  return InspectionRepository();
-});
+final inspectionRepositoryProvider = Provider<InspectionRepository>(
+  (ref) => InspectionRepository(ref.watch(appDatabaseProvider)),
+);
 
-final allChecklistsProvider = FutureProvider<List<ChecklistModel>>((ref) {
-  return ref.watch(checklistRepositoryProvider).getAllChecklists();
-});
+final allChecklistsProvider = FutureProvider<List<ChecklistModel>>(
+  (ref) => ref.watch(checklistRepositoryProvider).getAll(),
+);
 
-final checklistsByCategoryProvider =
-    FutureProvider.family<List<ChecklistModel>, String>((ref, category) {
-  return ref.watch(checklistRepositoryProvider).getByCategory(category);
-});
-
-final allEquipmentsProvider = FutureProvider<List<EquipmentModel>>((ref) {
-  return ref.watch(equipmentRepositoryProvider).getAll();
-});
-
-final draftInspectionsProvider = FutureProvider<List<InspectionModel>>((ref) {
-  return ref.watch(inspectionRepositoryProvider).getDraftInspections();
-});
+final checklistByKeyProvider =
+    FutureProvider.family<ChecklistModel?, String>(
+  (ref, key) => ref.watch(checklistRepositoryProvider).getByKey(key),
+);
