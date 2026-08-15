@@ -8,9 +8,8 @@ import 'features/electrical/presentation/pages/electrical_menu_page.dart';
 import 'features/fire_safety/presentation/pages/fire_menu_page.dart';
 import 'features/forklift/presentation/pages/forklift_menu_page.dart';
 import 'features/inspections/presentation/pages/dynamic_inspection_page.dart';
+import 'features/inspections/presentation/pages/inspections_list_page.dart';
 
-/// روتر اصلی برنامه به‌صورت top-level تعریف می‌شود تا
-/// با هر بار rebuild ویجت‌ها، دوباره ساخته نشود.
 final GoRouter _router = GoRouter(
   routes: [
     GoRoute(
@@ -30,13 +29,20 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const ForkliftMenuPage(),
     ),
     GoRoute(
+      path: '/inspections',
+      builder: (context, state) => const InspectionsListPage(),
+    ),
+    GoRoute(
       path: '/inspection/:section',
       builder: (context, state) {
-        final section = state.pathParameters['section'] ?? '';
-        final title = state.uri.queryParameters['title'] ?? 'فرم بازرسی';
+        final sectionKey = state.pathParameters['section'] ?? '';
+        final title = state.uri.queryParameters['title'] ?? 'بازرسی';
+        final inspectionId =
+            int.tryParse(state.uri.queryParameters['inspectionId'] ?? '');
         return DynamicInspectionPage(
-          sectionKey: section,
+          sectionKey: sectionKey,
           sectionTitle: title,
+          inspectionId: inspectionId,
         );
       },
     ),
@@ -44,36 +50,25 @@ final GoRouter _router = GoRouter(
 );
 
 void main() {
-  runApp(
-    const ProviderScope(
-      child: HSEInspectionApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: HseApp()));
 }
 
-class HSEInspectionApp extends StatelessWidget {
-  const HSEInspectionApp({super.key});
+class HseApp extends StatelessWidget {
+  const HseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'سیستم بازرسی HSE',
       debugShowCheckedModeBanner: false,
+      title: 'بازرسی HSE',
       routerConfig: _router,
       locale: const Locale('fa', 'IR'),
-      supportedLocales: const [
-        Locale('fa', 'IR'),
-        Locale('en', 'US'),
-      ],
+      supportedLocales: const [Locale('fa', 'IR')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-      ),
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,
