@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class DynamicInspectionPage extends StatefulWidget {
+import '../../../../core/models/answer_model.dart';
+import '../../../../core/models/checklist_model.dart';
+import '../../../../core/models/checklist_question_model.dart';
+import '../../../../core/models/inspection_model.dart';
+import '../../../../core/models/inspection_status.dart';
+import '../../../../core/providers/providers.dart';
+
+const _yesNoOptions = <Map<String, String>>[
+  {'v': 'yes', 'l': 'بله'},
+  {'v': 'no', 'l': 'خیر'},
+  {'v': 'na', 'l': 'بررسی نشده'},
+];
+
+const _yesPartialNoOptions = <Map<String, String>>[
+  {'v': 'yes', 'l': 'بله'},
+  {'v': 'partial', 'l': 'تا حدودی'},
+  {'v': 'no', 'l': 'خیر'},
+  {'v': 'na', 'l': 'بررسی نشده'},
+];
+
+class DynamicInspectionPage extends ConsumerStatefulWidget {
   final String sectionKey;
   final String sectionTitle;
 
@@ -11,264 +32,323 @@ class DynamicInspectionPage extends StatefulWidget {
   });
 
   @override
-  State<DynamicInspectionPage> createState() => _DynamicInspectionPageState();
+  ConsumerState<DynamicInspectionPage> createState() =>
+      _DynamicInspectionPageState();
 }
 
-class _DynamicInspectionPageState extends State<DynamicInspectionPage> {
-  final Map<int, String> _answers = {};
-  final Map<int, TextEditingController> _notesControllers = {};
-
-  late final List<InspectionQuestion> _questions;
-
-  @override
-  void initState() {
-    super.initState();
-    _questions = _buildSampleQuestions(widget.sectionKey);
-
-    for (var i = 0; i < _questions.length; i++) {
-      _notesControllers[i] = TextEditingController();
-    }
-  }
+class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
+  final Map<String, String> _answers = {};
+  final Map<String, TextEditingController> _noteControllers = {};
+  final Map<String, TextEditingController> _actionControllers = {};
+  bool _saving = false;
 
   @override
   void dispose() {
-    for (final controller in _notesControllers.values) {
-      controller.dispose();
+    for (final c in _noteControllers.values) {
+      c.dispose();
+    }
+    for (final c in _actionControllers.values) {
+      c.dispose();
     }
     super.dispose();
   }
 
-  List<InspectionQuestion> _buildSampleQuestions(String sectionKey) {
-    switch (sectionKey) {
-      case 'electrical_general':
-        return const [
-          InspectionQuestion('سیم‌کشی‌ها در وضعیت ایمن قرار دارند.'),
-          InspectionQuestion('از اتصالات غیرمجاز و موقت استفاده نشده است.'),
-          InspectionQuestion('پوشش و عایق تجهیزات الکتریکی سالم است.'),
-        ];
-      case 'electrical_panels':
-        return const [
-          InspectionQuestion('درب تابلو برق سالم و قابل بسته شدن است.'),
-          InspectionQuestion('روی تابلو برق علائم هشدار نصب شده است.'),
-          InspectionQuestion('در مقابل تابلو برق مانع یا انسداد وجود ندارد.'),
-        ];
-      case 'electrical_substations':
-        return const [
-          InspectionQuestion('دسترسی به پست برق محدود و کنترل‌شده است.'),
-          InspectionQuestion('تجهیزات پست برق دارای وضعیت ظاهری مناسب هستند.'),
-          InspectionQuestion('نظافت و نظم محیط پست برق مناسب است.'),
-        ];
-      case 'portable_electrical_devices':
-        return const [
-          InspectionQuestion('کابل دستگاه سالم و بدون پارگی است.'),
-          InspectionQuestion('دوشاخه و اتصالات دستگاه سالم هستند.'),
-          InspectionQuestion('بدنه دستگاه فاقد آسیب‌دیدگی ظاهری است.'),
-        ];
-      default:
-        return const [
-          InspectionQuestion('سوال نمونه ۱'),
-          InspectionQuestion('سوال نمونه ۲'),
-          InspectionQuestion('سوال نمونه ۳'),
-        ];
-    }
-  }
+  TextEditingController _noteControllerFor(ChecklistQuestionModel q) =>
+      _noteControllers.putIfAbsent(q.id, () => TextEditingController());
 
-  void _submitForm() {
-    final unanswered = _questions.asMap().entries.where((entry) {
-      final index = entry.key;
-      return _answers[index] == null;
-    }).toList();
+  TextEditingController _actionControllerFor(ChecklistQuestionModel q) =>
+      _actionControllers.putIfAbsent(q.id, () => TextEditingController());
 
-    if (unanswered.isNotEmpty) {
+  List<Map<String, String>> _optionsFor(String type) =>
+      type == 'yes_partial_no' ? _yesPartialNoOptions : _yesNoOptions;
+
+  Future<void> _save({required bool asDraft}) async {
+    final asyncValue = ref.read(checklistByKeyProvider(widget.sectionKey));
+    final checklist = asyncValue.valueOrNull;
+    if (checklist == null) return;
+
+    final missing = checklist.questions
+        .where((q) => q.requiredField && (_answers[q.id]?.isEmpty ?? true))
+        .toList();
+
+    if (missing.isNotEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('لطفاً وضعیت همه سوالات را مشخص کنید.'),
+        SnackBar(
+          content: Text('${missing.length} سؤال الزامی بدون پاسخ مانده است.'),
         ),
       );
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'اطلاعات فرم با موفقیت ثبت شد. اتصال به دیتابیس در مرحله بعد انجام می‌شود.',
+    setState(() => _saving = true);
+
+    final now = DateTime.now();
+    final inspection = InspectionModel(
+      checklistId: checklist.id,
+      sectionKey: widget.sectionKey,
+      title: widget.sectionTitle,
+      status: asDraft
+          ? InspectionStatus.draft.dbValue
+          : InspectionStatus.completed.dbValue,
+      startedAt: now,
+      completedAt: asDraft ? null : now,
+    );
+
+    final answers = checklist.questions.map((q) {
+      return AnswerModel(
+        inspectionId: 0, // داخل ریپازیتوری با id واقعی جایگزین می‌شود
+        questionId: q.id,
+        answer: _answers[q.id] ?? 'na',
+        note: _cleanText(_noteControllers[q.id]?.text),
+        correctiveAction: _cleanText(_actionControllers[q.id]?.text),
+      );
+    }).toList();
+
+    try {
+      final id = await ref.read(inspectionRepositoryProvider).saveInspection(
+            inspection: inspection,
+            answers: answers,
+          );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            asDraft ? 'پیش‌نویس با کد $id ذخیره شد.' : 'بازرسی با کد $id ثبت شد.',
+          ),
+        ),
+      );
+      Navigator.of(context).pop(true);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('خطا در ذخیره‌سازی: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  String? _cleanText(String? value) {
+    final t = value?.trim();
+    return (t == null || t.isEmpty) ? null : t;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncValue = ref.watch(checklistByKeyProvider(widget.sectionKey));
+
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.sectionTitle)),
+      body: asyncValue.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => _ErrorView(
+          message: '$e',
+          onRetry: () =>
+              ref.invalidate(checklistByKeyProvider(widget.sectionKey)),
+        ),
+        data: (checklist) {
+          if (checklist == null) return const _NotFoundView();
+          return _buildForm(checklist);
+        },
+      ),
+      bottomNavigationBar: asyncValue.maybeWhen(
+        data: (c) => c != null ? _buildBottomBar() : null,
+        orElse: () => null,
+      ),
+    );
+  }
+
+  Widget _buildForm(ChecklistModel checklist) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: checklist.questions.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final q = checklist.questions[index];
+        return _QuestionCard(
+          index: index,
+          question: q,
+          options: _optionsFor(q.type),
+          selected: _answers[q.id],
+          onSelected: (v) => setState(() => _answers[q.id] = v),
+          noteController: _noteControllerFor(q),
+          actionController: _actionControllerFor(q),
+        );
+      },
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _saving ? null : () => _save(asDraft: true),
+                child: const Text('ذخیره پیش‌نویس'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: FilledButton(
+                onPressed: _saving ? null : () => _save(asDraft: false),
+                child: _saving
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('ثبت نهایی بازرسی'),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+class _QuestionCard extends StatelessWidget {
+  final int index;
+  final ChecklistQuestionModel question;
+  final List<Map<String, String>> options;
+  final String? selected;
+  final ValueChanged<String> onSelected;
+  final TextEditingController noteController;
+  final TextEditingController actionController;
+
+  const _QuestionCard({
+    required this.index,
+    required this.question,
+    required this.options,
+    required this.selected,
+    required this.onSelected,
+    required this.noteController,
+    required this.actionController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.sectionTitle),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade50,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.orange.shade200),
-            ),
-            child: Column(
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'فرم بازرسی',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                CircleAvatar(
+                  radius: 14,
+                  backgroundColor: theme.colorScheme.primary,
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'بخش انتخاب‌شده: ${widget.sectionTitle}',
-                  style: const TextStyle(fontSize: 14),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    question.requiredField
+                        ? '${question.text} *'
+                        : question.text,
+                    style: theme.textTheme.bodyLarge,
+                  ),
                 ),
               ],
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              itemCount: _questions.length,
-              itemBuilder: (context, index) {
-                final question = _questions[index];
-
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${index + 1}. ${question.text}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            height: 1.5,
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            _AnswerChoiceChip(
-                              label: 'OK',
-                              selected: _answers[index] == 'OK',
-                              color: Colors.green,
-                              onSelected: () {
-                                setState(() {
-                                  _answers[index] = 'OK';
-                                });
-                              },
-                            ),
-                            _AnswerChoiceChip(
-                              label: 'NG',
-                              selected: _answers[index] == 'NG',
-                              color: Colors.red,
-                              onSelected: () {
-                                setState(() {
-                                  _answers[index] = 'NG';
-                                });
-                              },
-                            ),
-                            _AnswerChoiceChip(
-                              label: 'NA',
-                              selected: _answers[index] == 'NA',
-                              color: Colors.grey,
-                              onSelected: () {
-                                setState(() {
-                                  _answers[index] = 'NA';
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        TextField(
-                          controller: _notesControllers[index],
-                          maxLines: 3,
-                          decoration: InputDecoration(
-                            labelText: 'توضیحات / اقدام اصلاحی',
-                            hintText: 'در صورت نیاز توضیح یا اقدام اصلاحی را وارد کنید',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: options.map((o) {
+                final isSelected = selected == o['v'];
+                return ChoiceChip(
+                  label: Text(o['l']!),
+                  selected: isSelected,
+                  onSelected: (_) => onSelected(o['v']!),
                 );
-              },
+              }).toList(),
             ),
-          ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  child: const Text(
-                    'ثبت فرم بازرسی',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: noteController,
+              textAlign: TextAlign.right,
+              maxLines: 2,
+              decoration: const InputDecoration(
+                labelText: 'توضیحات',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+            TextField(
+              controller: actionController,
+              textAlign: TextAlign.right,
+              maxLines: 1,
+              decoration: const InputDecoration(
+                labelText: 'شماره / شرح اقدام اصلاحی',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class InspectionQuestion {
-  final String text;
+class _ErrorView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
 
-  const InspectionQuestion(this.text);
-}
-
-class _AnswerChoiceChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onSelected;
-
-  const _AnswerChoiceChip({
-    required this.label,
-    required this.selected,
-    required this.color,
-    required this.onSelected,
-  });
+  const _ErrorView({required this.message, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onSelected(),
-      selectedColor: color.withOpacity(0.18),
-      labelStyle: TextStyle(
-        color: selected ? color : Colors.black87,
-        fontWeight: FontWeight.bold,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('تلاش دوباره'),
+            ),
+          ],
+        ),
       ),
-      side: BorderSide(
-        color: selected ? color : Colors.grey.shade400,
+    );
+  }
+}
+
+class _NotFoundView extends StatelessWidget {
+  const _NotFoundView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.search_off, size: 48, color: Colors.grey),
+          SizedBox(height: 12),
+          Text('چک‌لیستی برای این بخش یافت نشد.'),
+        ],
       ),
     );
   }
