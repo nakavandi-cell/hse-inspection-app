@@ -1,16 +1,20 @@
 enum InspectionStatus {
-  draft('draft', 'پیشنویس'),
-  inProgress('in_progress', 'در حال انجام'),
-  completed('completed', 'تکمیل شده');
+  draft('draft'),
+  inProgress('in_progress'),
+  completed('completed');
 
-  final String value;
-  final String label;
-  const InspectionStatus(this.value, this.label);
+  const InspectionStatus(this.dbValue);
+  final String dbValue;
 
-  static InspectionStatus fromValue(String v) {
-    return InspectionStatus.values.firstWhere(
-      (s) => s.value == v,
-      orElse: () => InspectionStatus.draft,
-    );
+  static InspectionStatus fromDb(String? value) {
+    switch (value) {
+      case 'in_progress':
+        return InspectionStatus.inProgress;
+      case 'completed':
+        return InspectionStatus.completed;
+      case 'draft':
+      default:
+        return InspectionStatus.draft;
+    }
   }
 }
