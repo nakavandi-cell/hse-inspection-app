@@ -32,4 +32,13 @@ class AnswerModel {
         'note': note,
         'corrective_action': correctiveAction,
       };
+
+  factory AnswerModel.fromMap(Map<String, dynamic> m) => AnswerModel(
+        id: m['id'] as int?,
+        inspectionId: m['inspection_id'] as int,
+        questionId: m['question_id'] as String,
+        answer: m['answer'] as String,
+        note: m['note'] as String?,
+        correctiveAction: m['corrective_action'] as String?,
+      );
 }
