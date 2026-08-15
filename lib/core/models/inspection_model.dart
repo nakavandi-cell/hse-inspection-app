@@ -26,4 +26,18 @@ class InspectionModel {
         'started_at': startedAt?.toIso8601String(),
         'completed_at': completedAt?.toIso8601String(),
       };
+
+  factory InspectionModel.fromMap(Map<String, dynamic> m) => InspectionModel(
+        id: m['id'] as int?,
+        checklistId: m['checklist_id'] as String,
+        sectionKey: m['section_key'] as String,
+        title: m['title'] as String,
+        status: m['status'] as String,
+        startedAt: m['started_at'] != null
+            ? DateTime.tryParse(m['started_at'] as String)
+            : null,
+        completedAt: m['completed_at'] != null
+            ? DateTime.tryParse(m['completed_at'] as String)
+            : null,
+      );
 }
