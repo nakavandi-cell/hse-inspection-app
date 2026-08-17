@@ -1,32 +1,77 @@
-// lib/models/answer_model.dart
-
 class AnswerModel {
-  final int? id; // برای دیتابیس (auto-increment)
+  final String id;
   final String inspectionId;
   final String questionId;
   final String answerValue;
+  final String? comment;
+  final DateTime? answeredAt;
 
-  AnswerModel({
-    this.id,
+  const AnswerModel({
+    required this.id,
     required this.inspectionId,
     required this.questionId,
     required this.answerValue,
+    this.comment,
+    this.answeredAt,
   });
+
+  factory AnswerModel.fromJson(Map<String, dynamic> json) {
+    return AnswerModel(
+      id: (json['id'] ?? '').toString(),
+      inspectionId: (json['inspectionId'] ?? '').toString(),
+      questionId: (json['questionId'] ?? '').toString(),
+      answerValue: (json['answerValue'] ?? '').toString(),
+      comment: json['comment']?.toString(),
+      answeredAt: json['answeredAt'] == null
+          ? null
+          : DateTime.tryParse(json['answeredAt'].toString()),
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
+      'inspectionId': inspectionId,
+      'questionId': questionId,
+      'answerValue': answerValue,
+      if (comment != null) 'comment': comment,
+      if (answeredAt != null) 'answeredAt': answeredAt!.toIso8601String(),
+    };
+  }
+
+  AnswerModel copyWith({
+    String? id,
+    String? inspectionId,
+    String? questionId,
+    String? answerValue,
+    String? comment,
+    DateTime? answeredAt,
+  }) {
+    return AnswerModel(
+      id: id ?? this.id,
+      inspectionId: inspectionId ?? this.inspectionId,
+      questionId: questionId ?? this.questionId,
+      answerValue: answerValue ?? this.answerValue,
+      comment: comment ?? this.comment,
+      answeredAt: answeredAt ?? this.answeredAt,
+    );
+  }
+
+  Map<String, dynamic> toDbMap() {
+    return {
+      'id': id,
       'inspection_id': inspectionId,
       'question_id': questionId,
       'answer_value': answerValue,
     };
   }
 
-  factory AnswerModel.fromJson(Map<String, dynamic> json) {
+  factory AnswerModel.fromDbMap(Map<String, dynamic> map) {
     return AnswerModel(
-      id: json['id'],
-      inspectionId: json['inspection_id'],
-      questionId: json['question_id'],
-      answerValue: json['answer_value'],
+      id: (map['id'] ?? '').toString(),
+      inspectionId: (map['inspection_id'] ?? '').toString(),
+      questionId: (map['question_id'] ?? '').toString(),
+      answerValue: (map['answer_value'] ?? '').toString(),
     );
   }
 }
