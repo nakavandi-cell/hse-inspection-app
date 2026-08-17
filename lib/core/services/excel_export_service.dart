@@ -13,7 +13,7 @@ String _answerLabel(String v) {
     case 'partial':
       return 'تا حدودی';
     case 'na':
-      return 'بررسی نشده';
+      return 'ثبت نشده';
     default:
       return v;
   }
@@ -35,7 +35,39 @@ String _statusLabel(String s) {
 class ExcelExportService {
   const ExcelExportService();
 
-  /// گزارش کامل یک بازرسی (به‌همراه همه سؤال‌ها و پاسخ‌ها)
+  /// گزارش خلاصه‌ی همه بازرسی‌ها
+  List<int>? buildSummaryReport(List<InspectionModel> inspections) {
+    final excel = Excel.createExcel();
+    final sheet = excel['فهرست بازرسی‌ها'];
+
+    const headers = ['کد', 'عنوان', 'وضعیت', 'زمان شروع', 'زمان تکمیل'];
+    for (var j = 0; j < headers.length; j++) {
+      sheet
+          .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: 0))
+          .value = TextCellValue(headers[j]);
+    }
+
+    var row = 1;
+    for (final it in inspections) {
+      final values = [
+        '${it.id ?? '-'}',
+        it.title,
+        _statusLabel(it.status),
+        it.startedAt?.toString() ?? '',
+        it.completedAt?.toString() ?? '',
+      ];
+      for (var j = 0; j < values.length; j++) {
+        sheet
+            .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: row))
+            .value = TextCellValue(values[j]);
+      }
+      row++;
+    }
+
+    return excel.encode();
+  }
+
+  /// گزارش کامل یک بازرسی (به‌همراه پرسش‌ها و پاسخ‌ها)
   List<int>? buildInspectionReport({
     required InspectionModel inspection,
     required ChecklistModel checklist,
@@ -62,7 +94,7 @@ class ExcelExportService {
       for (var j = 0; j < header[i].length; j++) {
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: i))
-            .value = TextCellValue(header[i][j]?.toString() ?? '');
+            .value = TextCellValue(header[i][j]);
       }
     }
 
@@ -72,7 +104,7 @@ class ExcelExportService {
       final a = answers.firstWhere(
         (x) => x.questionId == q.id,
         orElse: () => AnswerModel(
-          inspectionId: 0,
+          inspectionId: inspection.id ?? 0,
           questionId: q.id,
           answer: 'na',
         ),
@@ -83,38 +115,6 @@ class ExcelExportService {
         _answerLabel(a.answer),
         a.note ?? '',
         a.correctiveAction ?? '',
-      ];
-      for (var j = 0; j < values.length; j++) {
-        sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: row))
-            .value = TextCellValue(values[j]);
-      }
-      row++;
-    }
-
-    return excel.encode();
-  }
-
-  /// فهرست خلاصه همه بازرسی‌ها
-  List<int>? buildSummaryReport(List<InspectionModel> inspections) {
-    final excel = Excel.createExcel();
-    final sheet = excel['فهرست بازرسی‌ها'];
-
-    const headers = ['کد', 'عنوان', 'وضعیت', 'زمان شروع', 'زمان تکمیل'];
-    for (var j = 0; j < headers.length; j++) {
-      sheet
-          .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: 0))
-          .value = TextCellValue(headers[j]);
-    }
-
-    var row = 1;
-    for (final it in inspections) {
-      final values = [
-        '${it.id ?? '-'}',
-        it.title,
-        _statusLabel(it.status),
-        it.startedAt?.toString() ?? '',
-        it.completedAt?.toString() ?? '',
       ];
       for (var j = 0; j < values.length; j++) {
         sheet
