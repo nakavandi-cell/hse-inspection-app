@@ -1,39 +1,35 @@
 class EquipmentModel {
-  final int? id;
-  final String code;
+  final String id;
   final String name;
   final String category;
-  final String location;
-  final String? description;
-  final String? createdAt;
+  final String? location;
+  final bool isActive;
 
   EquipmentModel({
-    this.id,
-    required this.code,
+    required this.id,
     required this.name,
     required this.category,
-    required this.location,
-    this.description,
-    this.createdAt,
+    this.location,
+    required this.isActive,
   });
 
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'code': code,
-        'name': name,
-        'category': category,
-        'location': location,
-        'description': description,
-        'created_at': createdAt,
-      };
+  factory EquipmentModel.fromJson(Map<String, dynamic> json) {
+    return EquipmentModel(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      category: json['category'] as String,
+      location: json['location'] as String?,
+      isActive: (json['isActive'] as int?) == 1 || json['isActive'] == true,
+    );
+  }
 
-  factory EquipmentModel.fromMap(Map<String, dynamic> map) => EquipmentModel(
-        id: map['id'] as int?,
-        code: map['code'] as String,
-        name: map['name'] as String,
-        category: map['category'] as String,
-        location: map['location'] as String,
-        description: map['description'] as String?,
-        createdAt: map['created_at'] as String?,
-      );
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'category': category,
+      'location': location,
+      'isActive': isActive ? 1 : 0,
+    };
+  }
 }
