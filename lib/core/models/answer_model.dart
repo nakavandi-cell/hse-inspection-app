@@ -1,44 +1,32 @@
-class AnswerModel {
-  final int? id;
-  final int inspectionId;
-  final String questionId;
-  final String answer;
-  final String? note;
-  final String? correctiveAction;
+// lib/models/answer_model.dart
 
-  const AnswerModel({
+class AnswerModel {
+  final int? id; // برای دیتابیس (auto-increment)
+  final String inspectionId;
+  final String questionId;
+  final String answerValue;
+
+  AnswerModel({
     this.id,
     required this.inspectionId,
     required this.questionId,
-    required this.answer,
-    this.note,
-    this.correctiveAction,
+    required this.answerValue,
   });
 
-  AnswerModel copyWithInspectionId(int newInspectionId) => AnswerModel(
-        id: id,
-        inspectionId: newInspectionId,
-        questionId: questionId,
-        answer: answer,
-        note: note,
-        correctiveAction: correctiveAction,
-      );
+  Map<String, dynamic> toJson() {
+    return {
+      'inspection_id': inspectionId,
+      'question_id': questionId,
+      'answer_value': answerValue,
+    };
+  }
 
-  Map<String, dynamic> toMap() => {
-        if (id != null) 'id': id,
-        'inspection_id': inspectionId,
-        'question_id': questionId,
-        'answer': answer,
-        'note': note,
-        'corrective_action': correctiveAction,
-      };
-
-  factory AnswerModel.fromMap(Map<String, dynamic> m) => AnswerModel(
-        id: m['id'] as int?,
-        inspectionId: m['inspection_id'] as int,
-        questionId: m['question_id'] as String,
-        answer: m['answer'] as String,
-        note: m['note'] as String?,
-        correctiveAction: m['corrective_action'] as String?,
-      );
+  factory AnswerModel.fromJson(Map<String, dynamic> json) {
+    return AnswerModel(
+      id: json['id'],
+      inspectionId: json['inspection_id'],
+      questionId: json['question_id'],
+      answerValue: json['answer_value'],
+    );
+  }
 }
