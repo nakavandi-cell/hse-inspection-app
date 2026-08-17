@@ -1,41 +1,70 @@
-class ChecklistQuestionModel {
+class ChecklistQuestion {
   final String id;
-  final String checklistId;
   final String text;
-  final String type;
+  final String? checklistId;
   final bool requiredField;
+  final String answerType;
+  final List<String> options;
+  final int order;
 
-  const ChecklistQuestionModel({
+  const ChecklistQuestion({
     required this.id,
-    required this.checklistId,
     required this.text,
-    required this.type,
-    required this.requiredField,
+    this.checklistId,
+    this.requiredField = true,
+    this.answerType = 'yes_no',
+    this.options = const [],
+    this.order = 0,
   });
 
-  factory ChecklistQuestionModel.fromJson(Map<String, dynamic> json) =>
-      ChecklistQuestionModel(
-        id: json['id'] as String,
-        checklistId: json['checklistId'] as String,
-        text: json['text'] as String,
-        type: json['type'] as String,
-        requiredField: json['requiredField'] as bool? ?? true,
-      );
+  factory ChecklistQuestion.fromJson(Map<String, dynamic> json) {
+    return ChecklistQuestion(
+      id: (json['id'] ?? '').toString(),
+      text: (json['text'] ?? json['title'] ?? '').toString(),
+      checklistId: json['checklistId']?.toString(),
+      requiredField: json['requiredField'] == null
+          ? true
+          : json['requiredField'] == true || json['requiredField'] == 1,
+      answerType: (json['answerType'] ?? 'yes_no').toString(),
+      options: (json['options'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      order: json['order'] is int
+          ? json['order'] as int
+          : int.tryParse(json['order']?.toString() ?? '') ?? 0,
+    );
+  }
 
-  Map<String, dynamic> toMap() => {
-        'id': id,
-        'checklist_id': checklistId,
-        'text': text,
-        'type': type,
-        'required_field': requiredField ? 1 : 0,
-      };
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'text': text,
+      if (checklistId != null) 'checklistId': checklistId,
+      'requiredField': requiredField,
+      'answerType': answerType,
+      'options': options,
+      'order': order,
+    };
+  }
 
-  factory ChecklistQuestionModel.fromMap(Map<String, dynamic> m) =>
-      ChecklistQuestionModel(
-        id: m['id'] as String,
-        checklistId: m['checklist_id'] as String,
-        text: m['text'] as String,
-        type: m['type'] as String,
-        requiredField: (m['required_field'] as int? ?? 1) == 1,
-      );
+  ChecklistQuestion copyWith({
+    String? id,
+    String? text,
+    String? checklistId,
+    bool? requiredField,
+    String? answerType,
+    List<String>? options,
+    int? order,
+  }) {
+    return ChecklistQuestion(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      checklistId: checklistId ?? this.checklistId,
+      requiredField: requiredField ?? this.requiredField,
+      answerType: answerType ?? this.answerType,
+      options: options ?? this.options,
+      order: order ?? this.order,
+    );
+  }
 }
