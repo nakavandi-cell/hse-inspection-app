@@ -10,6 +10,6 @@ Future<void> saveExcelBytes({
     name: fileName,
     bytes: Uint8List.fromList(bytes),
     ext: 'xlsx',
-    mimeType: MimeType.microsoftExcel,
+    mimeType: MimeType.xlsx,
   );
 }
