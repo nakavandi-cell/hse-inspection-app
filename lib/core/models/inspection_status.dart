@@ -1,20 +1,17 @@
+// lib/models/inspection_status.dart
+
 enum InspectionStatus {
-  draft('draft'),
-  inProgress('in_progress'),
-  completed('completed');
+  draft,     // پیش‌نویس
+  completed, // تکمیل‌شده
+  exported   // خروجی گرفته‌شده
+}
 
-  const InspectionStatus(this.dbValue);
-  final String dbValue;
-
-  static InspectionStatus fromDb(String? value) {
-    switch (value) {
-      case 'in_progress':
-        return InspectionStatus.inProgress;
-      case 'completed':
-        return InspectionStatus.completed;
-      case 'draft':
-      default:
-        return InspectionStatus.draft;
+extension InspectionStatusExtension on InspectionStatus {
+  String get name {
+    switch (this) {
+      case InspectionStatus.draft: return 'draft';
+      case InspectionStatus.completed: return 'completed';
+      case InspectionStatus.exported: return 'exported';
     }
   }
 }
