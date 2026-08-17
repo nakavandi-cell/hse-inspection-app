@@ -1,84 +1,56 @@
-import 'package:path/path.dart' as p;
+// lib/core/db/database_helper.dart
+
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
-class AppDatabase {
-  AppDatabase._();
-  static final AppDatabase instance = AppDatabase._();
+class DatabaseHelper {
+  static final DatabaseHelper instance = DatabaseHelper._init();
+  static Database? _database;
 
-  Database? _database;
+  DatabaseHelper._init();
 
   Future<Database> get database async {
-    _database ??= await _init();
+    if (_database != null) return _database!;
+    _database = await _initDB('hse_inspection.db');
     return _database!;
   }
 
-  Future<Database> _init() async {
-    final dir = await getDatabasesPath();
-    final path = p.join(dir, 'hse_inspection.db');
-    return openDatabase(
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
       path,
       version: 1,
-      onConfigure: (db) async => db.execute('PRAGMA foreign_keys = ON'),
-      onCreate: _onCreate,
+      onCreate: _createDB,
     );
   }
 
-  Future<void> _onCreate(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE equipments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        type TEXT NOT NULL,
-        location TEXT,
-        created_at TEXT
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE checklists (
-        id TEXT PRIMARY KEY,
-        title TEXT NOT NULL,
-        category TEXT NOT NULL,
-        code TEXT,
-        version TEXT
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE checklist_questions (
-        id TEXT PRIMARY KEY,
-        checklist_id TEXT NOT NULL,
-        text TEXT NOT NULL,
-        type TEXT NOT NULL,
-        required_field INTEGER NOT NULL DEFAULT 1,
-        position INTEGER NOT NULL DEFAULT 0,
-        FOREIGN KEY (checklist_id) REFERENCES checklists (id)
-      )
-    ''');
-
+  Future _createDB(Database db, int version) async {
+    // ایجاد جدول بازرسی‌ها
     await db.execute('''
       CREATE TABLE inspections (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        checklist_id TEXT NOT NULL,
-        section_key TEXT NOT NULL,
-        title TEXT NOT NULL,
-        status TEXT NOT NULL,
-        started_at TEXT,
-        completed_at TEXT
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        date TEXT,
+        status TEXT
       )
     ''');
 
+    // ایجاد جدول پاسخ‌ها (برای ذخیره جواب سوالات هر بازرسی)
     await db.execute('''
-      CREATE TABLE inspection_answers (
+      CREATE TABLE answers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        inspection_id INTEGER NOT NULL,
-        question_id TEXT NOT NULL,
-        answer TEXT NOT NULL,
-        note TEXT,
-        corrective_action TEXT,
-        FOREIGN KEY (inspection_id) REFERENCES inspections (id),
-        FOREIGN KEY (question_id) REFERENCES checklist_questions (id)
+        inspection_id TEXT,
+        question_id TEXT,
+        answer_value TEXT,
+        FOREIGN KEY(inspection_id) REFERENCES inspections(id)
       )
     ''');
+  }
+
+  Future close() async {
+    final db = await instance.database;
+    db.close();
   }
 }
