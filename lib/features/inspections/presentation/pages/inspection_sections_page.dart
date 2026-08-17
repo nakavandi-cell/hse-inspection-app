@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/models/inspection_model.dart';
 import '../../../../core/models/inspection_status.dart';
 import '../../../../core/providers/providers.dart';
+import '../../../../core/services/excel_export_service.dart';
+import '../../../../utils/file_saver_helper.dart';
 
 class InspectionsListPage extends ConsumerWidget {
   const InspectionsListPage({super.key});
@@ -15,7 +17,16 @@ class InspectionsListPage extends ConsumerWidget {
     final asyncValue = ref.watch(inspectionsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('بازرسی‌ها')),
+      appBar: AppBar(
+        title: const Text('بازرسی‌ها'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'خروجی Excel',
+            onPressed: () => _exportSummary(context, ref),
+          ),
+        ],
+      ),
       body: asyncValue.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => _ListError(
@@ -36,6 +47,41 @@ class InspectionsListPage extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+
+  Future<void> _exportSummary(BuildContext context, WidgetRef ref) async {
+    try {
+      final list = await ref.read(inspectionsProvider.future);
+      if (list.isEmpty) {
+        _showSnack(context, 'بازرسی‌ای برای خروجی وجود ندارد.');
+        return;
+      }
+
+      final bytes = const ExcelExportService().buildSummaryReport(list);
+      if (bytes == null) {
+        _showSnack(context, 'خطا در ساخت فایل Excel.');
+        return;
+      }
+
+      await saveExcelBytes(
+        fileName: 'inspection_summary_${DateTime.now().millisecondsSinceEpoch}',
+        bytes: bytes,
+      );
+
+      if (context.mounted) {
+        _showSnack(context, 'فایل Excel دانلود شد.');
+      }
+    } catch (_) {
+      if (context.mounted) {
+        _showSnack(context, 'خطا در خروجی Excel.');
+      }
+    }
+  }
+
+  void _showSnack(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }
