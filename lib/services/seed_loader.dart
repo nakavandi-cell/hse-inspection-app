@@ -1,22 +1,20 @@
-// lib/services/seed_loader.dart
-
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
-import '../models/checklist_model.dart';
+import '../core/models/checklist_model.dart';
 
 class SeedLoader {
+  SeedLoader._();
+
   static Future<List<Checklist>> loadChecklists() async {
     try {
-      // 1. بارگذاری فایل JSON از مسیر asset تعریف شده
       final String response = await rootBundle.loadString('assets/seeds/checklist_seed.json');
+      final Map<String, dynamic> data = json.decode(response);
       
-      // 2. تبدیل رشته JSON به لیست داینامیک
-      final List<dynamic> data = json.decode(response);
+      final List<dynamic> checklistsJson = data['checklists'];
       
-      // 3. تبدیل لیست داینامیک به لیست مدل Checklist
-      return data.map((json) => Checklist.fromJson(json)).toList();
+      return checklistsJson.map((json) => Checklist.fromJson(json)).toList();
     } catch (e) {
-      print("Error loading checklist seed: $e");
+      // در محیط واقعی، خطا را لاگ کنید
       return [];
     }
   }
