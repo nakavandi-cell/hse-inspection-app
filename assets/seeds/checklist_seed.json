@@ -1,129 +1,456 @@
-[
-  {
-    "id": "fire_safety_001",
-    "title": "چک‌لیست ایمنی حریق (عمومی)",
-    "category": "fire_safety",
-    "code": "FS-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "fs_q1", "text": "آیا کپسول‌های آتش‌نشانی به‌صورت ماهانه بازرسی می‌شوند؟", "type": "yes_no", "requiredField": true },
-      { "id": "fs_q2", "text": "آیا مسیرهای خروج اضطراری باز و بدون مانع هستند؟", "type": "yes_no", "requiredField": true },
-      { "id": "fs_q3", "text": "آیا سیستم اعلام حریق تست شده است؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "electrical_general_001",
-    "title": "برق عمومی",
-    "category": "electrical_general",
-    "code": "EL-GEN-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "eg_q1", "text": "آیا وضعیت سیم‌کشی‌ها فاقد فرسودگی مشهود است؟", "type": "yes_partial_no", "requiredField": true },
-      { "id": "eg_q2", "text": "آیا کلیدهای محافظ جان (RCD) تست دوره‌ای شده‌اند؟", "type": "yes_partial_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "electrical_panels_001",
-    "title": "تابلوهای برق",
-    "category": "electrical_panels",
-    "code": "EL-PAN-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "ep_q1", "text": "آیا تابلوهای برق دارای درپوش محافظ هستند؟", "type": "yes_no", "requiredField": true },
-      { "id": "ep_q2", "text": "آیا برچسب خطر برق‌گرفتگی روی تابلو نصب شده است؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "electrical_substations_001",
-    "title": "تابلوهای پست برق",
-    "category": "electrical_substations",
-    "code": "EL-SUB-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "es_q1", "text": "آیا دمای ترانسفورماتورها در محدوده استاندارد است؟", "type": "yes_no", "requiredField": true },
-      { "id": "es_q2", "text": "آیا دسترسی به پست برق فقط برای افراد مجاز است؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "portable_electrical_devices_001",
-    "title": "وسایل پرتابل برقی",
-    "category": "portable_electrical_devices",
-    "code": "EL-POR-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "pe_q1", "text": "آیا دوشاخه‌ها سالم و بدون تغییرات غیرمجاز هستند؟", "type": "yes_no", "requiredField": true },
-      { "id": "pe_q2", "text": "آیا کابل‌های رابط دارای عایق سالم هستند؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "forklift_hse_001",
-    "title": "بازرسی ایمنی لیفتراک",
-    "category": "forklift_hse",
-    "code": "FL-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "fl_q1", "text": "آیا ترمزهای لیفتراک در وضعیت عملکردی مطلوب هستند؟", "type": "yes_no", "requiredField": true },
-      { "id": "fl_q2", "text": "آیا بوق دنده عقب لیفتراک سالم است؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "production_hse_001",
-    "title": "ایمنی تولید",
-    "category": "production_hse",
-    "code": "PR-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "pr_q1", "text": "آیا پرسنل از تجهیزات حفاظت فردی (PPE) استفاده می‌کنند؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "warehouse_hse_001",
-    "title": "ایمنی انبار",
-    "category": "warehouse_hse",
-    "code": "WH-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "wh_q1", "text": "آیا قفسه‌بندی‌ها دارای پایداری کافی هستند؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "welding_hse_001",
-    "title": "ایمنی جوشکاری",
-    "category": "welding_hse",
-    "code": "WD-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "wd_q1", "text": "آیا کپسول‌های گاز در وضعیت عمودی مهار شده‌اند؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "maintenance_hse_001",
-    "title": "ایمنی تعمیرات و نگهداری",
-    "category": "maintenance_hse",
-    "code": "MT-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "mt_q1", "text": "آیا سیستم Lockout/Tagout برای تجهیزات اجرا شده است؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "restaurant_hse_001",
-    "title": "ایمنی رستوران و آشپزخانه",
-    "category": "restaurant_hse",
-    "code": "RT-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "rt_q1", "text": "آیا وضعیت بهداشتی ظروف و محیط آشپزخانه کنترل شده است؟", "type": "yes_no", "requiredField": true }
-    ]
-  },
-  {
-    "id": "yard_hse_001",
-    "title": "ایمنی محوطه (Yard)",
-    "category": "yard_hse",
-    "code": "YD-001",
-    "version": "1.0",
-    "questions": [
-      { "id": "yd_q1", "text": "آیا روشنایی محوطه در شب کافی است؟", "type": "yes_no", "requiredField": true }
-    ]
+{
+  "version": 1,
+  "generatedAt": "2026-08-17",
+  "sourceDocuments": [
+    {
+      "file": "HSE-6-022V1.pdf",
+      "code": "-6-022HSE",
+      "title": "چک لیست فایر باکس",
+      "pages": [1],
+      "uniqueQuestions": 10
+    },
+    {
+      "file": "HSE-6-027V0.pdf",
+      "code": "-6-027HSE",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE",
+      "pages": [1, 2, 3, 4, 5, 6],
+      "uniqueQuestions": 114
+    },
+    {
+      "file": "HSE-6-028V0.pdf",
+      "code": "HSE-6-028",
+      "title": "چک‌لیست ایمنی برق",
+      "pages": [1, 2, 3, 4],
+      "uniqueQuestions": 68
+    }
+  ],
+  "checklists": [
+    {
+      "id": "firebox_001",
+      "code": "-6-022HSE",
+      "title": "چک لیست فایر باکس",
+      "category": "fire_safety",
+      "section": "firebox",
+      "sourceFile": "HSE-6-022V1.pdf",
+      "sourcePages": [1],
+      "answerType": "yes_no",
+      "formFields": [
+        { "key": "firebox_number", "label": "شماره فایرباکس", "type": "text", "required": true, "order": 1 },
+        { "key": "firebox_location", "label": "محل قرارگیری فایرباکس", "type": "text", "required": true, "order": 2 },
+        { "key": "hse_head", "label": "رئیس HSE", "type": "text", "required": true, "order": 3 },
+        { "key": "visitor_name_signature", "label": "نام و امضا", "type": "text", "required": false, "order": 4 }
+      ],
+      "questions": [
+        {
+          "id": "firebox_001_q001",
+          "text": "جعبه از نظرشکل ظاهری سالم است؟",
+          "subsystem": "فایر باکس",
+          "order": 1,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q002",
+          "text": "شیرفلکه سالم است؟",
+          "subsystem": "فایر باکس",
+          "order": 2,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q003",
+          "text": "کوپلینگ اتصال به سرشیلنگ فشارقوی دارد؟",
+          "subsystem": "شیرفلکه",
+          "order": 3,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q004",
+          "text": "عملکرد نازل درسه حالت درست است؟",
+          "subsystem": "فایر باکس",
+          "order": 4,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q005",
+          "text": "تست شیلنگ برزنتی بیست متری مورد قبول است؟",
+          "subsystem": "شلنگ برزنتی",
+          "order": 5,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q006",
+          "text": "خار قفلی کوپلینگها سالم است؟",
+          "subsystem": "شلنگ برزنتی",
+          "order": 6,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q007",
+          "text": "واشر آببندی کوپلینگ دو سرآن را دارد؟",
+          "subsystem": "شلنگ برزنتی",
+          "order": 7,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q008",
+          "text": "قرقره از نظرشکل وکارکرد سالم است؟",
+          "subsystem": "فایر باکس",
+          "order": 8,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q009",
+          "text": "آچار مخصوص باز و بست کوپلینگ دارد؟",
+          "subsystem": "فایر باکس",
+          "order": 9,
+          "answerType": "yes_no"
+        },
+        {
+          "id": "firebox_001_q010",
+          "text": "کلید درب جعبه درمحل خود قرار دارد؟",
+          "subsystem": "فایر باکس",
+          "order": 10,
+          "answerType": "yes_no"
+        }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_001",
+      "code": "-6-027HSE-01",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - سالن تولید",
+      "category": "periodic_hse",
+      "section": "production_hall",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [1],
+      "answerType": "yes_no",
+      "formFields": [
+        { "key": "inspection_location", "label": "محل بازرسی", "type": "text", "required": true, "order": 1 },
+        { "key": "inspection_date", "label": "تاریخ بازرسی", "type": "date", "required": true, "order": 2 },
+        { "key": "hse_signature", "label": "امضا کارشناس HSE", "type": "text", "required": false, "order": 3 },
+        { "key": "head_signature", "label": "امضا رئیس HSE", "type": "text", "required": false, "order": 4 }
+      ],
+      "questions": [
+        { "id": "hse_periodic_027_001_q001", "text": "جعبه کمکهای اولیه با تجهیزات لازم در محل وجود دارد؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q002", "text": "کارگران از تجهیزات حفاظت فردی استفاده میکنند؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q003", "text": "نظم و نظافت سالن به خوبی انجام میشود؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q004", "text": "نظافت رختکن مناسب است؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q005", "text": "نظافت سرویسهای بهداشتی مناسب است؟", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q006", "text": "نظافت غذاخوری مناسب است؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q007", "text": "شستشوی آبسردکنها و تانکهای آب آشامیدنی انجام شده است؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q008", "text": "وضعیت دیوارها، کف، سقف و شیشه پنجرهها مناسب است؟", "order": 8, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q009", "text": "جمعآوری و تفکیک زبالهها و ضایعات مناسب است؟", "order": 9, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q010", "text": "کلیه قسمتهای انتقال نیرو مانند تسمه، چرخ دنده و غیره حفاظ مناسب دارد؟", "order": 10, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q011", "text": "سیستم ایمنی و قطع کن اضطراری ماشین آلات به نحو موثر کار میکند؟", "order": 11, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q012", "text": "شیلنگهای هوای فشرده سالم و دارای بست مناسب میباشند؟", "order": 12, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q013", "text": "قبل از شروع به تعمیر و سرویسکاری ماشین آلات به طور مطمئنی متوقف میشوند؟", "order": 13, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q014", "text": "ماشین آلات معیوب و یا در دست تعمیر با علایم هشداردهنده مشخص میشوند؟", "order": 14, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q015", "text": "تجهیزات برقی مانند دریل و سنگ و غیره سالم و فاقد عیوب فنی و الکتریکی هستند؟", "order": 15, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q016", "text": "مقابل تابلوهای برق کفپوش عایق نصب شده است؟", "order": 16, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q017", "text": "درب تابلوهای برق بسته است؟", "order": 17, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q018", "text": "کلیه کلید و پریزها سالم و بدون عیب هستند؟", "order": 18, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q019", "text": "کابلهای برق سالم و بدون عیب هستند؟", "order": 19, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q020", "text": "کلیه تجهیزات اطفای حریق کنترل ماهیانه شدهاند؟", "order": 20, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q021", "text": "اطراف تجهیزات اعلام و اطفای حریق باز است؟", "order": 21, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q022", "text": "درها و مسیرهای خروجی اضطراری مشخص شدهاند؟", "order": 22, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q023", "text": "مقابل درها و مسیرهای خروجی اضطراری باز بوده و مسدود نشدهاند؟", "order": 23, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q024", "text": "MSDS مواد تهیه شده و در دسترس قرار دارد؟", "order": 24, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q025", "text": "از نشت و ریزش مواد شیمیایی بر روی زمین به نحو مناسب جلوگیری شده است؟", "order": 25, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q026", "text": "محل نگهداری مواد شیمیایی دارای تهویه مناسب میباشد؟", "order": 26, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q027", "text": "کلیه پرتگاهها و محلهای سقوط، حفاظ گذاری شدهاند؟", "order": 27, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_001_q028", "text": "خطرات ایمنی، بهداشتی و زیست محیطی شناسایی شده و تحت کنترل میباشند؟", "order": 28, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_002",
+      "code": "-6-027HSE-02",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - انبار",
+      "category": "periodic_hse",
+      "section": "warehouse",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [2],
+      "note": "Page 2 contains a repeated printed block; only one unique set is stored.",
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "hse_periodic_027_002_q001", "text": "انبار دارای خروجیهای اضطراری مناسب بوده و این خروجیها کاملا باز است؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q002", "text": "آراستگی در محل انبار رعایت شده و از ریخت و پاش مواد اجتناب شده است؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q003", "text": "اطراف ساختمان انبار از خار و خاشاک و یا مواد قابل اشتعال پاکسازی شده است؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q004", "text": "تجهیزات اطفای حریق کنترل ماهیانه شده است؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q005", "text": "کلیه کلید و پریزها و کابلها سالم و بدون زدگی میباشد؟", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q006", "text": "کابلها از داخل لولههای فلزی عبور کرده و یا از نوع حفاظدار میباشند؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q007", "text": "لامپها و سیستم روشنایی از نوع ایمن بوده و فاصله ایمنی از مواد قابل اشتعال دارند؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q008", "text": "MSDS مواد تهیه، نصب و آموزش داده شده است؟", "order": 8, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q009", "text": "تاریخ انقضای مواد فاسد شدنی مورد توجه قرار میگیرد؟", "order": 9, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q010", "text": "مواد بر اساس زمان تولید مصرف میشوند؟", "order": 10, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q011", "text": "چیدمان کالا و بستههای مواد و قطعات مناسب و ایمن میباشد؟", "order": 11, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q012", "text": "آیا از نشتی روغنها و سایر مواد شیمیایی جلوگیری میگردد؟", "order": 12, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q013", "text": "کلیه پرتگاهها و محلهای سقوط حفاظ گذاری شدهاند؟", "order": 13, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_002_q014", "text": "خطرات ایمنی، بهداشتی و زیست محیطی شناسایی شده و تحت کنترل میباشند؟", "order": 14, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_003",
+      "code": "-6-027HSE-03",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - کارگاه جوشکاری",
+      "category": "periodic_hse",
+      "section": "welding_workshop",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [3],
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "hse_periodic_027_003_q001", "text": "جعبه کمکهای اولیه با تجهیزات لازم در محل وجود دارد؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q002", "text": "نیروهای کارگاه جوشکاری از تجهیزات حفاظت فردی استفاده میکنند؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q003", "text": "نظم و نظافت کارگاه به خوبی انجام میشود؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q004", "text": "جمعآوری و تفکیک زبالهها و ضایعات مناسب است؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q005", "text": "کلیه قسمتهای انتقال نیرو دارای حفاظ مناسب میباشند؟", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q006", "text": "کلیه کلید و پریزها سالم و بدون عیب هستند؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q007", "text": "کابلهای برق سالم و بدون عیب هستند؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q008", "text": "شیلنگهای هوای فشرده سالم و دارای بست مناسب میباشند؟", "order": 8, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q009", "text": "کارگاه دارای تهویه مناسب میباشد؟", "order": 9, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q010", "text": "کلیه تجهیزات اطفای حریق کنترل ماهیانه شدهاند؟", "order": 10, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q011", "text": "کلیه قسمتهای دستگاههای الکتریکی، به سیستم اتصال زمین مجهز میباشند؟", "order": 11, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q012", "text": "شیرها، بستها و شیلنگهای متصل به سیلندرها سالم و ایمن هستند؟", "order": 12, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q013", "text": "سیلندرهای گاز به صورت قائم و ایمن نگهداری و به کار برده میشوند؟", "order": 13, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_003_q014", "text": "خطرات ایمنی، بهداشتی و زیست محیطی شناسایی شده و تحت کنترل میباشند؟", "order": 14, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_004",
+      "code": "-6-027HSE-04",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - کارگاه تاسیسات",
+      "category": "periodic_hse",
+      "section": "maintenance_workshop",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [4],
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "hse_periodic_027_004_q001", "text": "جعبه کمکهای اولیه با تجهیزات لازم در محل وجود دارد؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q002", "text": "کارگران از تجهیزات حفاظت فردی استفاده میکنند؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q003", "text": "نظم و نظافت کارگاه به خوبی انجام میشود؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q004", "text": "جمعآوری و تفکیک زبالهها و ضایعات مناسب است؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q005", "text": "از نشت و ریزش مواد شیمیایی و روغنهای سوخته و مصرفی جلوگیری میشود؟", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q006", "text": "کلیه قسمتهای انتقال نیرو دارای حفاظ مناسب میباشند؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q007", "text": "کلیه کلید و پریزها سالم و بدون عیب هستند؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q008", "text": "کابلهای برق سالم و بدون عیب هستند؟", "order": 8, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q009", "text": "شیلنگهای هوای فشرده سالم و دارای بست مناسب میباشند؟", "order": 9, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q010", "text": "کلیه تجهیزات اطفای حریق کنترل ماهیانه شدهاند؟", "order": 10, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q011", "text": "درب تابلوهای برق بسته است؟", "order": 11, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q012", "text": "مقابل تابلوهای برق کفپوش عایق نصب شده است؟", "order": 12, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q013", "text": "کلیه قسمتهای دستگاههای الکتریکی، به سیستم اتصال زمین مجهز میباشند؟", "order": 13, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q014", "text": "سرویس و نگهداری دیگهای بخار و آب جوش طبق برنامه انجام میشود؟", "order": 14, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q015", "text": "سرویس و نگهداری پمپهای آب طبق برنامه انجام میشود؟", "order": 15, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q016", "text": "تست هیدرواستاتیک سالیانه دیگهای بخار و آب جوش انجام میشود؟", "order": 16, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q017", "text": "تست ضخامت سنجی بدنه دیگهای بخار و آب جوش در بازرسی سالیانه انجام میشود؟", "order": 17, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q018", "text": "فشارسنجها (مانومترها) سالیانه یکبار کالیبره میشوند؟", "order": 18, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q019", "text": "MSDS مواد تهیه شده و در دسترس قرار دارد؟", "order": 19, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q020", "text": "خطرات ایمنی، بهداشتی و زیست محیطی شناسایی شده و تحت کنترل میباشند؟", "order": 20, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_004_q021", "text": "علایم ایمنی متناسب با خطرات محیط کار نصب شده است؟", "order": 21, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_005",
+      "code": "-6-027HSE-05",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - رستوران",
+      "category": "periodic_hse",
+      "section": "restaurant",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [5],
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "hse_periodic_027_005_q001", "text": "کلیه پرسنل دارای کارت سلامت میباشند؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q002", "text": "پرسنل آشپزخانه، نظافت فردی را رعایت مینمایند؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q003", "text": "پرسنل از کلاه، لباسکار و دستکش استفاده میکنند؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q004", "text": "نظم و نظافت محیط آشپزخانه و رستوران به خوبی انجام میشود؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q005", "text": "جعبه کمکهای اولیه با تجهیزات لازم در محل وجود دارد؟", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q006", "text": "وضعیت ظروف پخت و پز و سرو غذا مناسب است؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q007", "text": "نحوه نگهداری مواد غذایی مناسب است؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q008", "text": "تاریخ مصرف مواد غذایی رعایت میشود؟", "order": 8, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q009", "text": "وضعیت ظرفشوییها و کانالهای آبرو مناسب است؟", "order": 9, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q010", "text": "طوری دربها و پنجرهها سالم است؟", "order": 10, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q011", "text": "وضعیت دیوارها کف، سقف و شیشه پنجرهها مناسب است؟", "order": 11, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q012", "text": "شیرآلات و اتصالات آب و گاز سالم بوده و نشتی ندارد؟", "order": 12, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q013", "text": "جمعآوری و تفکیک زبالهها و ضایعات مناسب است؟", "order": 13, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q014", "text": "کلیه کلید و پریزها سالم و بدون عیب هستند؟", "order": 14, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q015", "text": "کابلهای برق سالم و بدون عیب هستند؟", "order": 15, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q016", "text": "تجهیزات اطفای حریق کنترل ماهیانه شدهاند؟", "order": 16, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q017", "text": "MSDS مواد تهیه شده و در دسترس قرار دارد؟", "order": 17, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_005_q018", "text": "خطرات ایمنی، بهداشتی و زیست محیطی شناسایی شده و تحت کنترل میباشند؟", "order": 18, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_006",
+      "code": "-6-027HSE-06",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - محوطه",
+      "category": "periodic_hse",
+      "section": "yard",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [5],
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "hse_periodic_027_006_q001", "text": "وضعیت خروجی آبراههای سطحی مناسب است؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q002", "text": "وضعیت محل و نحوه نگهداری کپسولهای گاز مناسب است؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q003", "text": "وضعیت نگهداری بشکههای بنزین مناسب است؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q004", "text": "وضعیت محل نگهداری مخازن گازوئیل مناسب است؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q005", "text": "نگهداری، تفکیک و نگهداری زبالهها و ضایعات مختلف کارخانه مناسب است", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q006", "text": "نگهداری فضای سبز مناسب است؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q007", "text": "نظم و نظافت محوطه کارخانه مناسب است؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_006_q008", "text": "خطرات ایمنی، بهداشتی و زیست محیطی شناسایی شده و تحت کنترل میباشند؟", "order": 8, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "hse_periodic_027_007",
+      "code": "-6-027HSE-07",
+      "title": "چک لیست کنترل و ارزیابی ادواری HSE - لیفتراک",
+      "category": "periodic_hse",
+      "section": "forklift",
+      "sourceFile": "HSE-6-027V0.pdf",
+      "sourcePages": [6],
+      "answerType": "yes_no",
+      "formFields": [
+        { "key": "forklift_number", "label": "لیفتراک شماره", "type": "text", "required": true, "order": 1 }
+      ],
+      "questions": [
+        { "id": "hse_periodic_027_007_q001", "text": "آیا لیفتراک مجهز به کپسول اطفاء حریق است؟", "order": 1, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q002", "text": "آیا شاخکهای لیفتراک سالم و بدون نقص است؟", "order": 2, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q003", "text": "آیا چراغهای جلو و عقب لیفتراک سالم است؟", "order": 3, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q004", "text": "آیا آژیر دنده عقب لیفتراک سالم و در حین کار عمل میکند؟", "order": 4, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q005", "text": "آیا وضعیت لاستیکها، چرخها و بدنه لیفتراک سالم است؟", "order": 5, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q006", "text": "آیا آینههای لیفتراک سالم است؟", "order": 6, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q007", "text": "آیا صندلی سالم و فاقد شکستگی است؟", "order": 7, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q008", "text": "آیا بست نگهدارنده سیلندر سوخت و کپسول اطفای حریق سالم است؟", "order": 8, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q009", "text": "آیا اتصالات شیلنگ روغن لیفتراک سالم و بدون نشتی و روغنریزی است؟", "order": 9, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q010", "text": "آیا ترمز، فرمان و دستگاههای کنترلی لیفتراک سالم است و درست کار میکند؟", "order": 10, "answerType": "yes_no" },
+        { "id": "hse_periodic_027_007_q011", "text": "آیا کابین لیفتراک مسقف است؟", "order": 11, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "electrical_028_001",
+      "code": "HSE-6-028-01",
+      "title": "چک‌لیست ایمنی برق - برق عمومی",
+      "category": "electrical",
+      "section": "general_electrical_safety",
+      "sourceFile": "HSE-6-028V0.pdf",
+      "sourcePages": [1],
+      "answerType": "yes_partial_no",
+      "formFields": [
+        { "key": "unit", "label": "واحد", "type": "text", "required": true, "order": 1 },
+        { "key": "inspection_date", "label": "تاریخ بازدید", "type": "date", "required": true, "order": 2 },
+        { "key": "visitor_name", "label": "نام و نام خانوادگی بازدیدکننده", "type": "text", "required": true, "order": 3 },
+        { "key": "visitor_signature", "label": "امضا", "type": "text", "required": false, "order": 4 },
+        { "key": "hse_unit", "label": "واحد HSE", "type": "text", "required": false, "order": 5 },
+        { "key": "hse_signature", "label": "امضا", "type": "text", "required": false, "order": 6 }
+      ],
+      "questions": [
+        { "id": "electrical_028_001_q001", "text": "آیا کلیه وسایل الکتریکی و ادوات برقی مثل کلیدها، پریزها و غیره سالم هستند؟", "order": 1, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q002", "text": "آیا سیم‌کشی مطابق اصول فنی می‌باشد؟", "order": 2, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q003", "text": "آیا سیم‌کشی غیر مجاز وجود دارد؟", "order": 3, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q004", "text": "آیا سیم‌ها از داخل لوله‌های عایق یا سینی برق عبور داده شده‌اند؟", "order": 4, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q005", "text": "آیا سر راه جریان برق دستگاه‌ها، فیوز سالم و متناسب قرار دارد؟", "order": 5, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q006", "text": "آیا هنگام تعمیرات از ابزار و وسایل ایمنی عایق استفاده می‌شود؟", "order": 6, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q007", "text": "آیا تعمیرات برق توسط افراد مسئول و متخصص انجام می‌شود؟", "order": 7, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q008", "text": "آیا هنگام تعمیرات دستگاه‌های برقی، فیوزهای تابلو برق مربوط به دستگاه برداشته می‌شود و تابلو \"دست نزنید\" نصب می‌شود؟", "order": 8, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q009", "text": "آیا کابل‌های دستگاه الکتریکی از کابل‌های دستگاه‌های خبرکننده مانند کاشف‌ها (detector) جدا می‌باشد؟", "order": 9, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q010", "text": "آیا نکات ایمنی در خصوص سیم‌های سیار رعایت می‌شود؟", "order": 10, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q011", "text": "آیا از وسایل حفاظت فردی مناسب در هنگام کار با وسایل برقی استفاده می‌شود؟", "order": 11, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q012", "text": "آیا کارگران برق‌کار، آموزش‌های لازم در مورد ایمنی برق و کمک‌های اولیه را دیده‌اند؟", "order": 12, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q013", "text": "آیا سیستم اتصال به زمین، چاه ارت و دستگاه ارت وجود دارد؟", "order": 13, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q014", "text": "آیا تمام دستگاه‌ها و تابلوهای برق به سیستم ارت متصل هستند و سیم اتصال به زمین به صورت دوره‌ای چک می‌شود؟", "order": 14, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q015", "text": "آیا مقاومت چاه ارت به صورت دوره‌ای ارزیابی می‌گیرد؟", "order": 15, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q016", "text": "آیا نکات ایمنی در هنگام کار در مکان‌های مرطوب رعایت می‌گردد؟", "order": 16, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q017", "text": "آیا قبل از استفاده از وسایل و ابزارآلات برقی، کنترل ایمنی آن‌ها صورت می‌گیرد؟ (زدگی، پارگی و غیره نداشته باشد)", "order": 17, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q018", "text": "آیا قبل از استفاده از وسایل برقی ولتاژ آن کنترل می‌شود؟ (آیا تمام دستگاه‌ها نشانگر ولتاژ دارند)", "order": 18, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q019", "text": "آیا سیستم برق‌گیر نصب شده است و کارگاه را به صورت مناسب تحت پوشش قرار می‌دهد؟", "order": 19, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q020", "text": "آیا نگهداری تجهیزات الکتریکی نصب شده به صورت دوره‌ای صورت می‌گیرد؟", "order": 20, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q021", "text": "آیا کلیدهای الکتریکی دستگاه‌ها برچسب‌های مناسب شناسایی دارند؟", "order": 21, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q022", "text": "آیا دستورالعمل‌های مناسب ایمنی برق وجود دارد و رعایت می‌گردد؟", "order": 22, "answerType": "yes_partial_no" },
+        { "id": "electrical_028_001_q023", "text": "آموزش‌های لازم در خصوص ایمنی برق و کمک‌های اولیه در هنگام برق‌گرفتگی داده شده است؟", "order": 23, "answerType": "yes_partial_no" }
+      ]
+    },
+    {
+      "id": "electrical_028_002",
+      "code": "HSE-6-028-02",
+      "title": "چک‌لیست ایمنی برق - تابلوهای برق",
+      "category": "electrical",
+      "section": "electrical_panels",
+      "sourceFile": "HSE-6-028V0.pdf",
+      "sourcePages": [2],
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "electrical_028_002_q001", "text": "تابلوهای برق سالم می‌باشد؟", "order": 24, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q002", "text": "محل قرارگرفتن تابلوهای برق مناسب است؟", "order": 25, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q003", "text": "تابلوهای برق در محفظه قفل‌دار مخصوص قرار دارد؟", "order": 26, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q004", "text": "تابلو برق در اختیار فرد مسئول و مورد بازرسی مستمر می‌باشد؟", "order": 27, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q005", "text": "اطراف تابلو برق فضای کافی (۱.۵ متر مربع) دارند؟", "order": 28, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q006", "text": "توصیه‌های ایمنی لازم در مجاورت تابلو نصب گردیده است؟", "order": 29, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q007", "text": "درب تابلو مجهز به قفل مخصوص می‌باشد؟", "order": 30, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q008", "text": "تابلوهای (پی ال سی) دارای کلید حفاظتی (جهت جلوگیری از وقوع حوادث) می‌باشند؟", "order": 31, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q009", "text": "فرش لاستیکی یا سکوی عایق در کنار تابلو موجود دارد؟", "order": 32, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q010", "text": "اطفاء کننده حریق متناسب در کنار تابلو (ترجیحاً کپسول اطفاء انیدرید کربنیک) دارد؟", "order": 33, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q011", "text": "کابل‌کشی استاندارد و مسیر سیم‌ها در تابلو قابل ردیابی می‌باشد؟", "order": 34, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q012", "text": "تابلو دارای سیستم اتصال به زمین می‌باشد؟", "order": 35, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q013", "text": "تابلو مجهز به سایر سیستم‌های حفاظتی مناسب (آژیر، بیمتال وغیره) می‌باشد؟", "order": 36, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q014", "text": "فاصله محل ورود سیم از پایین تابلو کنار ترمینال مجاز (۳۵ سانتی‌متر) می‌باشد؟", "order": 37, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q015", "text": "گلند جهت ورود سیم به داخل تابلو نصب شده گردیده است؟", "order": 38, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q016", "text": "پلاگ یا جسم مناسب (سوراخ بند) برای پوشش سوراخ‌های باز و اضافی تابلو موجود دارد؟", "order": 39, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q017", "text": "موقعیت کلیدها و نشانگرها در تابلو به لحاظ ایجاد فاصله لازم هنگام کار مناسب می‌باشد؟", "order": 40, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q018", "text": "برچسب‌های علامت‌گذاری کابل‌های مدار تابلو مناسب می‌باشد؟", "order": 41, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q019", "text": "فیوزها و کلیدهای خودکار متناسب با ولتاژ و جریان عبوری شبکه موجود دارد؟", "order": 42, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q020", "text": "روشنایی عمومی و موضعی تابلو مناسب می‌باشد؟", "order": 43, "answerType": "yes_no" },
+        { "id": "electrical_028_002_q021", "text": "محافظ‌هایی جهت تجهیزات الکتریکی حساس روی تابلو در نظر گرفته شده است؟", "order": 44, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "electrical_028_003",
+      "code": "HSE-6-028-03",
+      "title": "چک‌لیست ایمنی برق - تابلوهای پست برق ۲۰ کیلوولت",
+      "category": "electrical",
+      "section": "high_voltage_substation_panels",
+      "sourceFile": "HSE-6-028V0.pdf",
+      "sourcePages": [3],
+      "answerType": "yes_no",
+      "questions": [
+        { "id": "electrical_028_003_q001", "text": "در دو طرف تابلو برق فشار قوی، حداقل ۶۰ سانتی‌متر تا دیوار فاصله وجود دارد؟", "order": 45, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q002", "text": "فاصله جلوی تابلو تا دیوار ۱۳۰ سانتی‌متر می‌باشد؟", "order": 46, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q003", "text": "ارتفاع از کف پست برق تا روشنایی سقف حداقل ۱۹۰ سانتی‌متر می‌باشد؟", "order": 47, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q004", "text": "حداقل فضای دسترسی از رو به رو تابلو ۷۵ سانتی‌متر است؟", "order": 48, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q005", "text": "فاصله بالای تابلو (به ارتفاع ۱۹۰ سانتی‌متر تا سقف)، حداقل ۹۰ سانتی‌متر است؟", "order": 49, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q006", "text": "بر روی تابلو برق (علامت-نوشته) توجه ولتاژ بالا نصب یا نوشته شده است؟", "order": 50, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q007", "text": "جنب تابلو، خاموش‌کننده حریق انیدرید کربنیک نصب شده است؟", "order": 51, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q008", "text": "فرش عایق متناسب با ولتاژ، جلوی تابلو وجود دارد؟", "order": 52, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q009", "text": "دستکش و کلاه ایمنی (کلاس B) و چکمه عایق الکتریسیته و هندل مخصوص (جهت شارژ)، فازمتر متناسب با ولتاژ برق در دسترس می‌باشد؟", "order": 53, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q010", "text": "مخزن اضطراری روغن ترانس برق که در کف تابلو تعبیه شده سالم و بدون نشتی می‌باشد؟", "order": 54, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q011", "text": "غیر از درب ورودی منفذ دیگری (در یا پنجره) پیش‌بینی شده است؟", "order": 55, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q012", "text": "در اطراف ترانسفورماتورهای برق حداقل ۸۰ سانتی‌متر فاصله وجود دارد؟", "order": 56, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q013", "text": "فاصله کف ترانسفورماتورهای برق تا کانال آبرو حداقل ۲۰ سانتی‌متر می‌باشد؟", "order": 57, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q014", "text": "در پست برق، سیستم اعلان حریق متناسب نصب شده است؟", "order": 58, "answerType": "yes_no" },
+        { "id": "electrical_028_003_q015", "text": "در پست برق، سیستم اطفاء (از نوع اسپرینگلر اندریک کربنیک) نصب شده است؟", "order": 59, "answerType": "yes_no" }
+      ]
+    },
+    {
+      "id": "electrical_028_004",
+      "code": "HSE-6-028-04",
+      "title": "چک‌لیست ایمنی برق - وسایل برقی قابل حمل",
+      "category": "electrical",
+      "section": "portable_electrical_equipment",
+      "sourceFile": "HSE-6-028V0.pdf",
+      "sourcePages": [4],
+      "answerType": "yes_no",
+      "formFields": [
+        { "key": "portable_equipment_note", "label": "توضیح/کد وسیله", "type": "text", "required": false, "order": 1 }
+      ],
+      "questions": [
+        { "id": "electrical_028_004_q001", "text": "آیا پریزهای تک فاز و سه فاز دارای سیم ارت می‌باشند؟", "order": 60, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q002", "text": "آیا قسمت‌های الکتریکی بین دستگاه‌ها عایق می‌باشد؟", "order": 61, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q003", "text": "آیا کلید دستگاه‌ها عایق هستند؟", "order": 62, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q004", "text": "آیا سیم رابط و سیم سیار سالم است؟", "order": 63, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q005", "text": "آیا سیم اتصال به زمین به درستی طراحی شده است؟", "order": 64, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q006", "text": "آیا از تعمیر این دستگاه توسط افراد غیر مسئول جلوگیری می‌شود؟", "order": 65, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q007", "text": "آیا پریزها به تعداد کافی و در همه جا نصب شده است تا از سیم‌کشی‌های سیار خودداری شود؟", "order": 66, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q008", "text": "آیا قبل از وصل شدن دستگاه به برق، دستگاه به سیم اتصال به زمین متصل می‌شود؟", "order": 67, "answerType": "yes_no" },
+        { "id": "electrical_028_004_q009", "text": "آیا پریزها دارای کلید مخصوص برای قطع جریان برق می‌باشند؟ (آیا داخل تابلو فیوز دارد؟)", "order": 68, "answerType": "yes_no" }
+      ]
+    }
+  ],
+  "summary": {
+    "totalUniqueQuestions": 192,
+    "sections": 12
   }
-]
+}
