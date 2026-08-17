@@ -4,124 +4,144 @@ import '../models/answer_model.dart';
 import '../models/checklist_model.dart';
 import '../models/inspection_model.dart';
 
-String _answerLabel(String v) {
-  switch (v) {
-    case 'yes':
-      return 'بله';
-    case 'no':
-      return 'خیر';
-    case 'partial':
-      return 'تا حدودی';
-    case 'na':
-      return 'ثبت نشده';
-    default:
-      return v;
-  }
-}
-
-String _statusLabel(String s) {
-  switch (s) {
-    case 'draft':
-      return 'پیش‌نویس';
-    case 'in_progress':
-      return 'در حال انجام';
-    case 'completed':
-      return 'تکمیل‌شده';
-    default:
-      return s;
-  }
-}
-
 class ExcelExportService {
   const ExcelExportService();
 
-  /// گزارش خلاصه‌ی همه بازرسی‌ها
+  String _answerLabel(String value) {
+    switch (value) {
+      case 'yes':
+        return 'بله';
+      case 'no':
+        return 'خیر';
+      case 'partial':
+        return 'تا حدودی';
+      case 'na':
+        return 'ثبت نشده';
+      default:
+        return value;
+    }
+  }
+
+  String _statusLabel(String value) {
+    switch (value) {
+      case 'draft':
+        return 'پیش‌نویس';
+      case 'in_progress':
+        return 'در حال انجام';
+      case 'completed':
+        return 'تکمیل‌شده';
+      default:
+        return value;
+    }
+  }
+
   List<int>? buildSummaryReport(List<InspectionModel> inspections) {
     final excel = Excel.createExcel();
     final sheet = excel['فهرست بازرسی‌ها'];
 
-    const headers = ['کد', 'عنوان', 'وضعیت', 'زمان شروع', 'زمان تکمیل'];
-    for (var j = 0; j < headers.length; j++) {
+    final headers = [
+      'شناسه',
+      'عنوان',
+      'بخش',
+      'وضعیت',
+      'زمان شروع',
+      'زمان تکمیل',
+    ];
+
+    for (var c = 0; c < headers.length; c++) {
       sheet
-          .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: 0))
-          .value = TextCellValue(headers[j]);
+          .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: 0))
+          .value = TextCellValue(headers[c]);
     }
 
-    var row = 1;
-    for (final it in inspections) {
+    for (var r = 0; r < inspections.length; r++) {
+      final item = inspections[r];
+      final row = r + 1;
+
       final values = [
-        '${it.id ?? '-'}',
-        it.title,
-        _statusLabel(it.status),
-        it.startedAt?.toString() ?? '',
-        it.completedAt?.toString() ?? '',
+        '${item.id ?? ''}',
+        item.title,
+        item.sectionKey,
+        _statusLabel(item.status),
+        item.startedAt?.toString() ?? '',
+        item.completedAt?.toString() ?? '',
       ];
-      for (var j = 0; j < values.length; j++) {
+
+      for (var c = 0; c < values.length; c++) {
         sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: row))
-            .value = TextCellValue(values[j]);
+            .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: row))
+            .value = TextCellValue(values[c]);
       }
-      row++;
     }
 
     return excel.encode();
   }
 
-  /// گزارش کامل یک بازرسی (به‌همراه پرسش‌ها و پاسخ‌ها)
   List<int>? buildInspectionReport({
     required InspectionModel inspection,
     required ChecklistModel checklist,
     required List<AnswerModel> answers,
   }) {
     final excel = Excel.createExcel();
-    final sheet = excel['بازرسی'];
+    final sheet = excel['گزارش بازرسی'];
 
-    final header = [
-      ['عنوان', inspection.title],
-      ['کد بازرسی', '${inspection.id ?? '-'}'],
-      [
-        'تاریخ ثبت',
-        inspection.completedAt?.toString() ??
-            inspection.startedAt?.toString() ??
-            '-'
-      ],
+    final infoRows = [
+      ['عنوان بازرسی', inspection.title],
+      ['شناسه بازرسی', '${inspection.id ?? ''}'],
+      ['بخش', inspection.sectionKey],
       ['وضعیت', _statusLabel(inspection.status)],
+      [
+        'زمان شروع',
+        inspection.startedAt?.toString() ?? ''
+      ],
+      [
+        'زمان تکمیل',
+        inspection.completedAt?.toString() ?? ''
+      ],
       [''],
-      ['ردیف', 'شرح سؤال', 'پاسخ', 'توضیحات', 'اقدام اصلاحی'],
+      ['عنوان چک‌لیست', checklist.title],
+      ['کد چک‌لیست', checklist.code],
+      ['نسخه', checklist.version],
+      [''],
+      ['ردیف', 'سؤال', 'پاسخ', 'توضیح', 'اقدام اصلاحی'],
     ];
 
-    for (var i = 0; i < header.length; i++) {
-      for (var j = 0; j < header[i].length; j++) {
+    for (var r = 0; r < infoRows.length; r++) {
+      final row = infoRows[r];
+      for (var c = 0; c < row.length; c++) {
         sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: i))
-            .value = TextCellValue(header[i][j]);
+            .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: r))
+            .value = TextCellValue(row[c]);
       }
     }
 
-    var row = header.length;
-    var rowNum = 0;
-    for (final q in checklist.questions) {
-      final a = answers.firstWhere(
-        (x) => x.questionId == q.id,
-        orElse: () => AnswerModel(
-          inspectionId: inspection.id ?? 0,
-          questionId: q.id,
-          answer: 'na',
-        ),
-      );
+    var startRow = infoRows.length;
+    for (var i = 0; i < checklist.questions.length; i++) {
+      final q = checklist.questions[i];
+      final answer = answers.where((a) => a.questionId == q.id).toList();
+      final a = answer.isNotEmpty
+          ? answer.first
+          : AnswerModel(
+              inspectionId: inspection.id ?? 0,
+              questionId: q.id,
+              answer: 'na',
+            );
+
       final values = [
-        '${++rowNum}',
+        '${i + 1}',
         q.text,
         _answerLabel(a.answer),
         a.note ?? '',
         a.correctiveAction ?? '',
       ];
-      for (var j = 0; j < values.length; j++) {
+
+      for (var c = 0; c < values.length; c++) {
         sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: row))
-            .value = TextCellValue(values[j]);
+            .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: startRow))
+            .value = TextCellValue(values[c]);
       }
-      row++;
+
+      startRow++;
     }
 
     return excel.encode();
