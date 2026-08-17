@@ -1,149 +1,121 @@
+import 'dart:io';
+
 import 'package:excel/excel.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../models/answer_model.dart';
 import '../models/checklist_model.dart';
 import '../models/inspection_model.dart';
 
 class ExcelExportService {
-  const ExcelExportService();
+  ExcelExportService._();
 
-  String _answerLabel(String value) {
-    switch (value) {
-      case 'yes':
-        return 'بله';
-      case 'no':
-        return 'خیر';
-      case 'partial':
-        return 'تا حدودی';
-      case 'na':
-        return 'ثبت نشده';
-      default:
-        return value;
-    }
-  }
+  static final ExcelExportService instance = ExcelExportService._();
 
-  String _statusLabel(String value) {
-    switch (value) {
-      case 'draft':
-        return 'پیش‌نویس';
-      case 'in_progress':
-        return 'در حال انجام';
-      case 'completed':
-        return 'تکمیل‌شده';
-      default:
-        return value;
-    }
-  }
-
-  List<int>? buildSummaryReport(List<InspectionModel> inspections) {
-    final excel = Excel.createExcel();
-    final sheet = excel['فهرست بازرسی‌ها'];
-
-    final headers = [
-      'شناسه',
-      'عنوان',
-      'بخش',
-      'وضعیت',
-      'زمان شروع',
-      'زمان تکمیل',
-    ];
-
-    for (var c = 0; c < headers.length; c++) {
-      sheet
-          .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: 0))
-          .value = TextCellValue(headers[c]);
-    }
-
-    for (var r = 0; r < inspections.length; r++) {
-      final item = inspections[r];
-      final row = r + 1;
-
-      final values = [
-        '${item.id ?? ''}',
-        item.title,
-        item.sectionKey,
-        _statusLabel(item.status),
-        item.startedAt?.toString() ?? '',
-        item.completedAt?.toString() ?? '',
-      ];
-
-      for (var c = 0; c < values.length; c++) {
-        sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: row))
-            .value = TextCellValue(values[c]);
-      }
-    }
-
-    return excel.encode();
-  }
-
-  List<int>? buildInspectionReport({
+  Future<File> exportInspection({
     required InspectionModel inspection,
-    required ChecklistModel checklist,
+    required Checklist checklist,
     required List<AnswerModel> answers,
-  }) {
+  }) async {
     final excel = Excel.createExcel();
-    final sheet = excel['گزارش بازرسی'];
+    final sheetName = 'Inspection';
 
-    final infoRows = [
-      ['عنوان بازرسی', inspection.title],
-      ['شناسه بازرسی', '${inspection.id ?? ''}'],
-      ['بخش', inspection.sectionKey],
-      ['وضعیت', _statusLabel(inspection.status)],
-      [
-        'زمان شروع',
-        inspection.startedAt?.toString() ?? ''
-      ],
-      [
-        'زمان تکمیل',
-        inspection.completedAt?.toString() ?? ''
-      ],
-      [''],
-      ['عنوان چک‌لیست', checklist.title],
-      ['کد چک‌لیست', checklist.code],
-      ['نسخه', checklist.version],
-      [''],
-      ['ردیف', 'سؤال', 'پاسخ', 'توضیح', 'اقدام اصلاحی'],
-    ];
+    final sheet = excel[sheetName];
 
-    for (var r = 0; r < infoRows.length; r++) {
-      final row = infoRows[r];
-      for (var c = 0; c < row.length; c++) {
-        sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: r))
-            .value = TextCellValue(row[c]);
-      }
+    // Remove default sheet if present and not needed.
+    if (excel.tables.containsKey('Sheet1')) {
+      excel.delete('Sheet1');
     }
 
-    var startRow = infoRows.length;
-    for (var i = 0; i < checklist.questions.length; i++) {
-      final q = checklist.questions[i];
-      final answer = answers.where((a) => a.questionId == q.id).toList();
-      final a = answer.isNotEmpty
-          ? answer.first
-          : AnswerModel(
-              inspectionId: inspection.id ?? 0,
-              questionId: q.id,
-              answer: 'na',
-            );
+    final headerStyle = CellStyle(
+      bold: true,
+      horizontalAlign: HorizontalAlign.Center,
+      verticalAlign: VerticalAlign.Center,
+    );
 
-      final values = [
-        '${i + 1}',
-        q.text,
-        _answerLabel(a.answer),
-        a.note ?? '',
-        a.correctiveAction ?? '',
-      ];
+    final valueStyle = CellStyle(
+      horizontalAlign: HorizontalAlign.Left,
+      verticalAlign: VerticalAlign.Center,
+    );
 
-      for (var c = 0; c < values.length; c++) {
-        sheet
-            .cell(CellIndex.indexByColumnRow(columnIndex: c, rowIndex: startRow))
-            .value = TextCellValue(values[c]);
-      }
+    int row = 0;
 
-      startRow++;
+    void writeLabelValue(String label, String value) {
+      sheet
+          .cell(CellIndex.indexByString('A${row + 1}'))
+          .value = TextCellValue(label);
+      sheet.cell(CellIndex.indexByString('A${row + 1}')).cellStyle = headerStyle;
+
+      sheet
+          .cell(CellIndex.indexByString('B${row + 1}'))
+          .value = TextCellValue(value);
+      sheet.cell(CellIndex.indexByString('B${row + 1}')).cellStyle = valueStyle;
+
+      row++;
     }
 
-    return excel.encode();
+    sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('HSE Inspection Report');
+    sheet.cell(CellIndex.indexByString('A1')).cellStyle = headerStyle;
+    row = 1;
+
+    writeLabelValue('Inspection ID', inspection.id);
+    writeLabelValue('Inspection Title', inspection.title);
+    writeLabelValue('Inspection Date', inspection.date.toIso8601String());
+    writeLabelValue('Inspection Status', inspection.status.toString());
+    writeLabelValue('Checklist ID', checklist.id);
+    writeLabelValue('Checklist Title', checklist.title);
+    writeLabelValue('Checklist Code', checklist.code);
+    writeLabelValue('Checklist Version', checklist.version);
+
+    row += 1;
+
+    sheet.cell(CellIndex.indexByString('A${row + 1}')).value =
+        TextCellValue('Questions and Answers');
+    sheet.cell(CellIndex.indexByString('A${row + 1}')).cellStyle = headerStyle;
+    row++;
+
+    sheet.cell(CellIndex.indexByString('A${row + 1}')).value = TextCellValue('Question ID');
+    sheet.cell(CellIndex.indexByString('B${row + 1}')).value = TextCellValue('Question Text');
+    sheet.cell(CellIndex.indexByString('C${row + 1}')).value = TextCellValue('Answer');
+    sheet.cell(CellIndex.indexByString('D${row + 1}')).value = TextCellValue('Required Field');
+
+    sheet.cell(CellIndex.indexByString('A${row + 1}')).cellStyle = headerStyle;
+    sheet.cell(CellIndex.indexByString('B${row + 1}')).cellStyle = headerStyle;
+    sheet.cell(CellIndex.indexByString('C${row + 1}')).cellStyle = headerStyle;
+    sheet.cell(CellIndex.indexByString('D${row + 1}')).cellStyle = headerStyle;
+
+    row++;
+
+    final questionMap = {
+      for (final q in checklist.questions) q.id: q,
+    };
+
+    for (final answer in answers) {
+      final question = questionMap[answer.questionId];
+      sheet.cell(CellIndex.indexByString('A${row + 1}')).value =
+          TextCellValue(answer.questionId);
+      sheet.cell(CellIndex.indexByString('B${row + 1}')).value =
+          TextCellValue(question?.text ?? '');
+      sheet.cell(CellIndex.indexByString('C${row + 1}')).value =
+          TextCellValue(answer.answerValue);
+      sheet.cell(CellIndex.indexByString('D${row + 1}')).value =
+          TextCellValue(question?.requiredField ?? '');
+
+      row++;
+    }
+
+    final directory = await getApplicationDocumentsDirectory();
+    final fileName = 'inspection_${inspection.id}.xlsx';
+    final filePath = '${directory.path}/$fileName';
+
+    final bytes = excel.encode();
+    if (bytes == null) {
+      throw StateError('Failed to encode Excel workbook.');
+    }
+
+    final file = File(filePath);
+    await file.writeAsBytes(bytes, flush: true);
+
+    return file;
   }
 }
