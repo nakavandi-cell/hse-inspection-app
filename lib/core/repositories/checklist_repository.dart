@@ -1,16 +1,29 @@
 import '../models/checklist_model.dart';
-import '../services/seed_loader.dart';
+import '../../services/seed_loader.dart';
 
 class ChecklistRepository {
   ChecklistRepository._();
   static final ChecklistRepository instance = ChecklistRepository._();
 
-  Future<List<Checklist>> getAllChecklists() async {
-    return SeedLoader.loadChecklists();
+  List<Checklist> _checklists = [];
+
+  List<Checklist> get checklists => _checklists;
+
+  Future<void> initialize() async {
+    if (_checklists.isEmpty) {
+      _checklists = await SeedLoader.loadChecklists();
+    }
   }
 
-  Future<List<Checklist>> getChecklistsByCategory(String category) async {
-    final all = await SeedLoader.loadChecklists();
-    return all.where((item) => item.category == category).toList();
+  List<Checklist> getByCategory(String category) {
+    return _checklists.where((c) => c.category == category).toList();
+  }
+
+  Checklist? getById(String id) {
+    try {
+      return _checklists.firstWhere((c) => c.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 }
