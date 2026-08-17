@@ -7,6 +7,8 @@ import '../../../../core/models/checklist_question_model.dart';
 import '../../../../core/models/inspection_model.dart';
 import '../../../../core/models/inspection_status.dart';
 import '../../../../core/providers/providers.dart';
+import '../../../../core/services/excel_export_service.dart';
+import '../../../../utils/file_saver_helper.dart';
 
 const _yesNoOptions = <Map<String, String>>[
   {'v': 'yes', 'l': 'بله'},
@@ -54,10 +56,8 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
       _loadingAnswers = true;
       Future.microtask(() async {
         try {
-          final inspection =
-              await ref.read(inspectionProvider(id).future);
-          final answers =
-              await ref.read(inspectionAnswersProvider(id).future);
+          final inspection = await ref.read(inspectionProvider(id).future);
+          final answers = await ref.read(inspectionAnswersProvider(id).future);
           if (!mounted) return;
           setState(() {
             _originalInspection = inspection;
@@ -176,6 +176,65 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
     }
   }
 
+  Future<void> _exportInspectionExcel() async {
+    final inspectionId = widget.inspectionId;
+
+    if (inspectionId == null) {
+      _showSnack('ابتدا بازرسی را ذخیره کنید، سپس خروجی Excel بگیرید.');
+      return;
+    }
+
+    final checklist =
+        ref.read(checklistByKeyProvider(widget.sectionKey)).valueOrNull;
+
+    if (checklist == null) {
+      _showSnack('چک‌لیست بازرسی برای تهیه گزارش پیدا نشد.');
+      return;
+    }
+
+    final inspection = _originalInspection;
+
+    if (inspection == null) {
+      _showSnack('اطلاعات بازرسی هنوز بارگذاری نشده است.');
+      return;
+    }
+
+    try {
+      final answers = checklist.questions.map((q) {
+        return AnswerModel(
+          inspectionId: inspectionId,
+          questionId: q.id,
+          answer: _answers[q.id] ?? 'na',
+          note: _cleanText(_noteControllers[q.id]?.text),
+          correctiveAction: _cleanText(_actionControllers[q.id]?.text),
+        );
+      }).toList();
+
+      final bytes = ExcelExportService().buildInspectionReport(
+        inspection: inspection,
+        checklist: checklist,
+        answers: answers,
+      );
+
+      await saveExcelBytes(
+        bytes: bytes,
+        fileName: 'inspection_$inspectionId',
+      );
+
+      if (!mounted) return;
+      _showSnack('گزارش Excel بازرسی با موفقیت دانلود شد.');
+    } catch (e) {
+      if (!mounted) return;
+      _showSnack('خطا در ساخت خروجی Excel: $e');
+    }
+  }
+
+  void _showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   String? _cleanText(String? value) {
     final t = value?.trim();
     return (t == null || t.isEmpty) ? null : t;
@@ -186,7 +245,18 @@ class _DynamicInspectionPageState extends ConsumerState<DynamicInspectionPage> {
     final asyncValue = ref.watch(checklistByKeyProvider(widget.sectionKey));
 
     return Scaffold(
-      appBar: AppBar(title: Text(widget.sectionTitle)),
+      appBar: AppBar(
+        title: Text(widget.sectionTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            tooltip: 'خروجی Excel بازرسی',
+            onPressed: (widget.inspectionId == null || _loadingAnswers)
+                ? null
+                : _exportInspectionExcel,
+          ),
+        ],
+      ),
       body: asyncValue.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => _ErrorView(
