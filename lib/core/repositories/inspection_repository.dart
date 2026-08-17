@@ -1,53 +1,31 @@
-import '../db/app_database.dart';
-import '../models/answer_model.dart';
+import 'package:sqflite/sqflite.dart';
+
+import '../core/db/database_helper.dart';
 import '../models/inspection_model.dart';
 
 class InspectionRepository {
-  InspectionRepository(this._db);
-  final AppDatabase _db;
+  InspectionRepository._();
+  static final InspectionRepository instance = InspectionRepository._();
 
-  /// اگر `id` داشته باشد یعنی ویرایش/ادامه است؛ وگرنه بازرسی جدید ثبت می‌شود.
-  Future<int> saveInspection({
-    required InspectionModel inspection,
-    required List<AnswerModel> answers,
-  }) async {
-    final db = await _db.database;
-    return db.transaction((txn) async {
-      final int inspectionId;
-      if (inspection.id != null) {
-        inspectionId = inspection.id!;
-        await txn.update(
-          'inspections',
-          inspection.toMap(),
-          where: 'id = ?',
-          whereArgs: [inspectionId],
-        );
-        await txn.delete(
-          'inspection_answers',
-          where: 'inspection_id = ?',
-          whereArgs: [inspectionId],
-        );
-      } else {
-        inspectionId = await txn.insert('inspections', inspection.toMap());
-      }
-      for (final answer in answers) {
-        await txn.insert(
-          'inspection_answers',
-          answer.copyWithInspectionId(inspectionId).toMap(),
-        );
-      }
-      return inspectionId;
-    });
+  Future<Database> get _db => DatabaseHelper.instance.database;
+
+  Future<int> insertInspection(InspectionModel inspection) async {
+    final db = await _db;
+    return db.insert(
+      'inspections',
+      inspection.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-  Future<List<InspectionModel>> getAll() async {
-    final db = await _db.database;
-    final rows = await db.query('inspections', orderBy: 'id DESC');
-    return rows.map(InspectionModel.fromMap).toList();
+  Future<List<InspectionModel>> getAllInspections() async {
+    final db = await _db;
+    final rows = await db.query('inspections', orderBy: 'date DESC');
+    return rows.map((e) => InspectionModel.fromJson(e)).toList();
   }
 
-  Future<InspectionModel?> getById(int id) async {
-    final db = await _db.database;
+  Future<InspectionModel?> getInspectionById(String id) async {
+    final db = await _db;
     final rows = await db.query(
       'inspections',
       where: 'id = ?',
@@ -55,17 +33,24 @@ class InspectionRepository {
       limit: 1,
     );
     if (rows.isEmpty) return null;
-    return InspectionModel.fromMap(rows.first);
+    return InspectionModel.fromJson(rows.first);
   }
 
-  Future<List<AnswerModel>> getAnswers(int inspectionId) async {
-    final db = await _db.database;
-    final rows = await db.query(
-      'inspection_answers',
-      where: 'inspection_id = ?',
-      whereArgs: [inspectionId],
-      orderBy: 'id ASC',
+  Future<int> deleteInspection(String id) async {
+    final db = await _db;
+    return db.delete('inspections', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> updateInspectionStatus({
+    required String id,
+    required String status,
+  }) async {
+    final db = await _db;
+    return db.update(
+      'inspections',
+      {'status': status},
+      where: 'id = ?',
+      whereArgs: [id],
     );
-    return rows.map(AnswerModel.fromMap).toList();
   }
 }
