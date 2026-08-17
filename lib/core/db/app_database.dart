@@ -1,56 +1,64 @@
-// lib/core/db/database_helper.dart
-
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 
-class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
-  static Database? _database;
+class AppDatabase {
+  AppDatabase._();
 
-  DatabaseHelper._init();
+  static final AppDatabase instance = AppDatabase._();
+
+  static const String _dbName = 'hse_inspection.db';
+  static const int _dbVersion = 1;
+
+  Database? _database;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('hse_inspection.db');
+    _database = await _initDatabase();
     return _database!;
   }
 
-  Future<Database> _initDB(String filePath) async {
+  Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, filePath);
+    final path = join(dbPath, _dbName);
 
-    return await openDatabase(
+    return openDatabase(
       path,
-      version: 1,
-      onCreate: _createDB,
+      version: _dbVersion,
+      onCreate: _onCreate,
     );
   }
 
-  Future _createDB(Database db, int version) async {
-    // ایجاد جدول بازرسی‌ها
+  Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
       CREATE TABLE inspections (
         id TEXT PRIMARY KEY,
-        title TEXT,
-        date TEXT,
-        status TEXT
+        title TEXT NOT NULL,
+        date TEXT NOT NULL,
+        status TEXT NOT NULL,
+        checklist_id TEXT,
+        checklist_title TEXT,
+        checklist_code TEXT
       )
     ''');
 
-    // ایجاد جدول پاسخ‌ها (برای ذخیره جواب سوالات هر بازرسی)
     await db.execute('''
       CREATE TABLE answers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        inspection_id TEXT,
-        question_id TEXT,
-        answer_value TEXT,
-        FOREIGN KEY(inspection_id) REFERENCES inspections(id)
+        id TEXT PRIMARY KEY,
+        inspection_id TEXT NOT NULL,
+        question_id TEXT NOT NULL,
+        answer_value TEXT NOT NULL,
+        FOREIGN KEY (inspection_id) REFERENCES inspections (id) ON DELETE CASCADE
       )
     ''');
-  }
 
-  Future close() async {
-    final db = await instance.database;
-    db.close();
+    await db.execute('''
+      CREATE TABLE equipments (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        location TEXT,
+        is_active INTEGER NOT NULL
+      )
+    ''');
   }
 }
