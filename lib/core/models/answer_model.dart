@@ -35,8 +35,33 @@ class AnswerModel {
       'questionId': questionId,
       'answerValue': answerValue,
       if (comment != null) 'comment': comment,
-      if (answeredAt != null) 'answeredAt': answeredAt!.toIso8601String(),
+      if (answeredAt != null)
+        'answeredAt': answeredAt!.toIso8601String(),
     };
+  }
+
+  Map<String, dynamic> toDbMap() {
+    return {
+      'id': id,
+      'inspection_id': inspectionId,
+      'question_id': questionId,
+      'answer_value': answerValue,
+      'comment': comment,
+      'answered_at': answeredAt?.toIso8601String(),
+    };
+  }
+
+  factory AnswerModel.fromDbMap(Map<String, dynamic> map) {
+    return AnswerModel(
+      id: (map['id'] ?? '').toString(),
+      inspectionId: (map['inspection_id'] ?? '').toString(),
+      questionId: (map['question_id'] ?? '').toString(),
+      answerValue: (map['answer_value'] ?? '').toString(),
+      comment: map['comment']?.toString(),
+      answeredAt: map['answered_at'] == null
+          ? null
+          : DateTime.tryParse(map['answered_at'].toString()),
+    );
   }
 
   AnswerModel copyWith({
@@ -53,25 +78,8 @@ class AnswerModel {
       questionId: questionId ?? this.questionId,
       answerValue: answerValue ?? this.answerValue,
       comment: comment ?? this.comment,
-      answeredAt: answeredAt ?? this.answeredAt,
-    );
-  }
+      answeredAt:`
 
-  Map<String, dynamic> toDbMap() {
-    return {
-      'id': id,
-      'inspection_id': inspectionId,
-      'question_id': questionId,
-      'answer_value': answerValue,
-    };
-  }
-
-  factory AnswerModel.fromDbMap(Map<String, dynamic> map) {
-    return AnswerModel(
-      id: (map['id'] ?? '').toString(),
-      inspectionId: (map['inspection_id'] ?? '').toString(),
-      questionId: (map['question_id'] ?? '').toString(),
-      answerValue: (map['answer_value'] ?? '').toString(),
-    );
+### تفاوت مهم نسخه اصلاح‌شده );
   }
 }
