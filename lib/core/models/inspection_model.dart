@@ -1,123 +1,242 @@
-import 'answer_model.dart';
-
-enum InspectionStatus {
-  draft,
-  inProgress,
-  completed,
-}
-
-extension InspectionStatusExtension on InspectionStatus {
-  String get name {
-    switch (this) {
-      case InspectionStatus.draft:
-        return 'draft';
-      case InspectionStatus.inProgress:
-        return 'inProgress';
-      case InspectionStatus.completed:
-        return 'completed';
-    }
-  }
-
-  static InspectionStatus fromString(String? val) {
-    if (val == null) return InspectionStatus.draft;
-    final lower = val.toLowerCase();
-    if (lower.contains('comp')) return InspectionStatus.completed;
-    if (lower.contains('prog')) return InspectionStatus.inProgress;
-    return InspectionStatus.draft;
-  }
-}
-
 class InspectionModel {
-  final String id;
-  final String? title;
-  final String? checklistId;
-  final String? checklistTitle;
-  final String? checklistCode;
-  final String checklistCategory;
-  final InspectionStatus status;
-  final DateTime createdAt;
-  final List<AnswerModel> answers;
+  final int? id;
+  final String title;
+  final String date;
+  final String status;
+  final String checklistId;
+  final String checklistTitle;
+  final String checklistCode;
+  final DateTime? createdAt;
 
-  const InspectionModel({
-    required this.id,
-    this.title,
-    this.checklistId,
-    this.checklistTitle,
-    this.checklistCode,
-    this.checklistCategory = 'عمومی',
-    this.status = InspectionStatus.draft,
-    DateTime? createdAt,
-    this.answers = const <AnswerModel>[],
-  }) : createdAt = createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+  InspectionModel({
+    this.id,
+    required this.title,
+    required this.date,
+    required this.status,
+    required this.checklistId,
+    required this.checklistTitle,
+    required this.checklistCode,
+    this.createdAt,
+  });
 
-  DateTime get date => createdAt;
-
-  factory InspectionModel.fromDbMap(
-    Map<String, dynamic> map, {
-    List<AnswerModel> answers = const <AnswerModel>[],
-  }) {
-    DateTime parsedDate = DateTime.now();
-    if (map['createdAt'] != null) {
-      parsedDate = DateTime.tryParse(map['createdAt'].toString()) ?? DateTime.now();
-    } else if (map['created_at'] != null) {
-      parsedDate = DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now();
-    } else if (map['date'] != null) {
-      parsedDate = DateTime.tryParse(map['date'].toString()) ?? DateTime.now();
-    }
-
-    final rawStatus = map['status'];
-    final InspectionStatus st = rawStatus is InspectionStatus
-        ? rawStatus
-        : InspectionStatusExtension.fromString(rawStatus?.toString());
-
-    return InspectionModel(
-      id: (map['id'] ?? '').toString(),
-      title: map['title']?.toString(),
-      checklistId: (map['checklistId'] ?? map['checklist_id'])?.toString(),
-      checklistTitle: (map['checklistTitle'] ?? map['checklist_title'] ?? map['title'] ?? '').toString(),
-      checklistCode: (map['checklistCode'] ?? map['checklist_code'])?.toString(),
-      checklistCategory: (map['checklistCategory'] ?? map['checklist_category'] ?? 'عمومی').toString(),
-      status: st,
-      createdAt: parsedDate,
-      answers: answers,
-    );
-  }
-
-  Map<String, dynamic> toDbMap() {
+  Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'title': title ?? checklistTitle ?? '',
-      'checklistId': checklistId ?? '',
-      'checklistTitle': checklistTitle ?? '',
-      'checklistCode': checklistCode ?? '',
-      'checklistCategory': checklistCategory,
-      'status': status.name,
-      'createdAt': createdAt.toIso8601String(),
-      'date': createdAt.toIso8601String(),
+      if (id != null) 'id': id,
+      'title': title,
+      'date': date,
+      'status': status,
+      'checklistId': checklistId,
+      'checklistTitle': checklistTitle,
+      'checklistCode': checklistCode,
+      if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
     };
   }
 
-  InspectionModel copyWith({
-    String? id,
-    String? title,
-    String? checklistId,
-    String? checklistTitle,
-    String? checklistCode,
-    String? checklistCategory,
-    InspectionStatus? status,
-    DateTime? createdAt,
-    List<AnswerModel>? answers,
-  }) {
+  Map<String, dynamic> toDbMap() {
+    return toMap();
+  }
+
+  factory InspectionModel.fromMap(Map<String, dynamic> map) {
     return InspectionModel(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      checklistId: checklistId ?? this.checklistId,
-      checklistTitle: checklistTitle ?? this.checklistTitle,
-      checklistCode: checklistCode ?? this.checklistCode,
-      checklistCategory: checklistCategory ?? this.checklistCategory,
-      status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
-      answers: answers ?? this.answers,
+      id: map['id'] as int?,
+      title: map['title'] as String? ?? '',
+      date: map['date'] as String? ?? '',
+      status: map['status'] as String? ?? 'pending',
+      checklistId: map['checklistId'] as String? ?? '',
+      checklistTitle: map['checklistTitle'] as String? ?? '',
+      checklistCode: map['checklistCode'] as String? ?? '',
+      createdAt: map['createdAt'] != null
+          ? DateTime.tryParse(map['createdAt'].toString())
+          : null,
+    );
+  }
+
+  InspectionModel copyWith({
+    int? id,
+    AxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (code.isNotEmpty)
+                        Text(
+                          'کد مدرک: $code',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'تعداد بخش‌ها: ${sections.length}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          /inspections/presentation/pages/dynamic_inspection_page.dart';
+
+class ChecklistDetailPage extends StatelessWidget {
+  final dynamic checklist;
+  final String? checklistId;
+
+  const ChecklistDetailPage({
+    super.key,
+    this.checklist,
+    this.checklistId,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final String title = checklist is Checklist
+        ? (checklist as Checklist).title
+        : (checklist != null && checklist.title != null
+            ? checklist.title.toString()
+            : 'جزئیات چک‌لیست');
+
+    final String code = checklist is Checklist
+        ? (checklist as Checklist).code
+        : (checklist != null && checklist.code != null
+            ? checklist.code.toString()
+            : '');
+
+    final String cId = checklist is Checklist
+        ? (checklist as Checklist).id
+        : (checklistId ?? (checklist != null && checklist.id != null ? checklist.id.toString() : ''));
+
+    final List<dynamic> sections = checklist is Checklist
+        ? (checklist as Checklist).sections
+        : (checklist != null && checklist.sections != null
+            ? checklist.sections as List<dynamic>
+            : []);
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(title),
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (code.isNotEmpty)
+                        Text(
+                          'کد مدرک: $code',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'تعداد بخش‌ها: ${sections.length}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DynamicInspectionPage(
+                        checklist: checklist,
+                        checklistId: cId,
+                        checklistTitle: title,
+                        checklistCode: code,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.play_arrow),
+                label: const Text(
+                  'شروع بازرسی جدید',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'بخش‌های این چک‌لیست:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: sections.length,
+                  itemBuilder: (context, index) {
+                    final section = sections[index];
+                    final sectionTitle = section is Section
+                        ? section.title
+                        : (section.title?.toString() ?? 'بخش ${index + 1}');
+                    final questionsCount = section is Section
+                        ? section.questions.length
+                        : (section.questions != null ? (section.questions as List).length : 0);
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                          child: Text('${index + 1}'),
+                        ),
+                        title: Text(sectionTitle),
+                        subtitle: Text('$questionsCount سوال / آیتم کنترلی'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
