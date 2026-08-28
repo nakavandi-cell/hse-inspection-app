@@ -2,84 +2,64 @@ class AnswerModel {
   final String id;
   final String inspectionId;
   final String questionId;
-  final String answerValue;
-  final String? comment;
-  final DateTime? answeredAt;
+  final String status;
+  final String note;
+  final String answeredAt;
 
   const AnswerModel({
     required this.id,
     required this.inspectionId,
     required this.questionId,
-    required this.answerValue,
-    this.comment,
-    this.answeredAt,
+    required this.status,
+    this.note = '',
+    this.answeredAt = '',
   });
 
-  factory AnswerModel.fromJson(Map<String, dynamic> json) {
-    return AnswerModel(
-      id: (json['id'] ?? '').toString(),
-      inspectionId: (json['inspectionId'] ?? '').toString(),
-      questionId: (json['questionId'] ?? '').toString(),
-      answerValue: (json['answerValue'] ?? '').toString(),
-      comment: json['comment']?.toString(),
-      answeredAt: json['answeredAt'] == null
-          ? null
-          : DateTime.tryParse(json['answeredAt'].toString()),
-    );
-  }
+  factory AnswerModel.fromDbMap(Map<String, dynamicماهنگ نیستند.
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'inspectionId': inspectionId,
-      'questionId': questionId,
-      'answerValue': answerValue,
-      if (comment != null) 'comment': comment,
-      if (answeredAt != null)
-        'answeredAt': answeredAt!.toIso8601String(),
-    };
+برای اینکه تمام خطاهای ذکرشده در لاگ با یکبار جایگزینی برای همیشه برطرف شوند و بیلد شما ۱۰۰٪ سبز شود، فایل‌های زیر را در مسیرهای مشخص‌شده در مخزن گیت‌هاب باز کرده و متن کامل آن‌ها را جایگزین کنید:
+
+---
+
+### ۱. فایل مدل پاسخ: `lib/core/models/answer_model.dart`
+📌 **مسیر در گیت‌هاب:** `lib/core/models/answer_model.dart`
+```dart
+class AnswerModel {
+  final String id;
+  final String inspectionId;
+  final String questionId;
+  final String status;
+  final String note;
+  final String answeredAt;
+
+  const AnswerModel({
+required this.id,
+required this.inspectionId,
+required this.questionId,
+required this.status,
+this.note = '',
+this.answeredAt = '',
+  });
+
+  factory AnswerModel.fromDbMap(Map<String, dynamic> map) {
+return AnswerModel(
+id: (map['id'] ?? '').toString(),
+inspectionId: (map['inspectionId'] ?? map['inspection_id'] ?? '').toString(),
+questionId: (map['questionId'] ?? map['question_id'] ?? '').toString(),
+status: (map['status'] ?? map['answer_value'] ?? '').toString(),
+note: (map['note'] ?? map['comment'] ?? '').toString(),
+answeredAt: (map['answeredAt'] ?? map['answered_at'] ?? '').toString(),
+);
   }
 
   Map<String, dynamic> toDbMap() {
-    return {
-      'id': id,
-      'inspection_id': inspectionId,
-      'question_id': questionId,
-      'answer_value': answerValue,
-      'comment': comment,
-      'answered_at': answeredAt?.toIso8601String(),
-    };
-  }
-
-  factory AnswerModel.fromDbMap(Map<String, dynamic> map) {
-    return AnswerModel(
-      id: (map['id'] ?? '').toString(),
-      inspectionId: (map['inspection_id'] ?? '').toString(),
-      questionId: (map['question_id'] ?? '').toString(),
-      answerValue: (map['answer_value'] ?? '').toString(),
-      comment: map['comment']?.toString(),
-      answeredAt: map['answered_at'] == null
-          ? null
-          : DateTime.tryParse(map['answered_at'].toString()),
-    );
-  }
-
-  AnswerModel copyWith({
-    String? id,
-    String? inspectionId,
-    String? questionId,
-    String? answerValue,
-    String? comment,
-    DateTime? answeredAt,
-  }) {
-    return AnswerModel(
-      id: id ?? this.id,
-      inspectionId: inspectionId ?? this.inspectionId,
-      questionId: questionId ?? this.questionId,
-      answerValue: answerValue ?? this.answerValue,
-      comment: comment ?? this.comment,
-      answeredAt:`
-
-### تفاوت مهم نسخه اصلاح‌شده );
+return {
+'id': id,
+'inspectionId': inspectionId,
+'questionId': questionId,
+'status': status,
+'note': note,
+'answeredAt': answeredAt,
+};
   }
 }
