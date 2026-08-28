@@ -74,8 +74,6 @@ class _ChecklistDetailPageState extends State<ChecklistDetailPage> {
         checklistId: _id,
         checklistTitle: _title,
         checklistCode: _code,
-        checklistCategory: widget.category,
-        createdAt: now,
       );
 
       final id = await AppDatabase.instance.insertInspection(newInspection);
