@@ -1,31 +1,22 @@
-import 'dart:io';
-import 'package:flutter/foundation.dart';
-import 'package:open_file/open_file.dart';
+import 'dart:typed_data';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
+import 'package:universal_html/html.dart' as html;
 
-class FileSaverHelper {
-  static Future<void> saveFileWeb(List<int> bytes, String fileName) async {
-    try {
-      if (kIsWeb) {
-        // در محیط وب در صورت نیاز از پکیج‌های وب استفاده می‌شود
-        return;
-      }
-
-      // در محیط اندروید و iOS
-      Directory? directory;
-      if (Platform.isAndroid) {
-        directory = await getExternalStorageDirectory();
-      }
-      directory ??= await getApplicationDocumentsDirectory();
-
-      final String filePath = '${directory.path}/$fileName';
-      final File file = File(filePath);
-      await file.writeAsBytes(bytes, flush: true);
-
-      // باز کردن خودکار فایل اکسل در گوشی کاربر
-      await OpenFile.open(filePath);
-    } catch (e) {
-      debugPrint('Error saving/opening file: $e');
+class FileSaverWeb {
+  static Future<void> saveAndDownload(Uint8List bytes, String fileName) async {
+    if (kIsWeb) {
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute('download', fileName)
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    } else {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(bytes);
     }
   }
 }
