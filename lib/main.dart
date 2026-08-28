@@ -1,159 +1,191 @@
 import 'package:flutter/material.dart';
+
 import 'services/seed_loader.dart';
-import 'pages/checklist_detail_page.dart';
-import 'pages/inspection_history_page.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const HSEInspectionApp());
+  runApp(const HseInspectionApp());
 }
 
-class HSEInspectionApp extends StatelessWidget {
-  const HSEInspectionApp({super.key});
+class HseInspectionApp extends StatelessWidget {
+  const HseInspectionApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'سامانه بازرسی HSE',
       debugShowCheckedModeBanner: false,
+      title: 'HSE Inspection App',
       theme: ThemeData(
-        primarySwatch: Colors.teal,
-        fontFamily: 'Roboto',
-        scaffoldBackgroundColor: const Color(0xFFF4F6F8),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF00695C),
-          foregroundColor: Colors.white,
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        cardTheme: const CardThemeData(
           elevation: 2,
+          margin: EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 6,
+          ),
         ),
-        cardTheme: CardTheme(
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        inputDecorationTheme: const InputDecorationTheme(
+          border: OutlineInputBorder(),
+          filled: true,
+          fillColor: Colors.white,
         ),
-      ),
-      home: const HomePage(),
+HomePage extends Stateless: const ChecklistHomePage(),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  String _selectedCategory = 'همه';
+class ChecklistHomePage extends StatelessWidget {
+  const ChecklistHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final categories = ['همه', ...SeedLoader.categories];
-    final displayedChecklists = _selectedCategory == 'همه'
-        ? SeedLoader.allChecklists
-        : SeedLoader.getByCategory(_selectedCategory);
+    final categories = SeedLoader.categories;
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('چک‌لیست‌های بازرسی HSE'),
+          title: const Text('بازرسی ایمنی و بهداشت'),
           centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.history),
-              tooltip: 'تاریخچه بازرسی‌ها',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const InspectionHistoryPage()),
+        ),
+        body: categories.isEmpty
+            ? const Center(
+                child: Text('هیچ چک‌لیستی ثبت نشده است.'),
+              )
+            :هیچ چک‌لیستی ثبت نشده است.'),
+              )
+            :                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  final checklists = SeedLoader.getByCategory(category);
+
+                  return Card(
+                    child: ExpansionTile(
+                      leading: const Icon(
+                        Icons.folder_open,
+                        color: Colors.blue,
+                      ),
+                      title: Text(
+                        category,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${checklists.length} چک‌لیست',
+                      ),
+                      children: checklists
+                          .map(
+                            (checklist) => ListTile(
+                              leading: const Icon(
+                                Icons.checklist,
+                                color: Colors.green,
+                              ),
+                              title: Text(checklist.title),
+                              subtitle: Text(checklist.code),
+                              trailing: const Icon(
+                                Icons.arrow_back_ios,
+                                size: 16,
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ChecklistPreviewPage(
+                                      checklist: checklist,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  );
+                },
+              ),
+      ),
+    );
+  }
+}
+
+class ChecklistPreviewPage extends StatelessWidget {
+  final ChecklistItem checklist;
+
+  const ChecklistPreviewPage({
+    super.key,
+    required this.checklist,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(checklist.title),
+        ),
+        body: ListView(
+          padding: const EdgeInsets.all(12),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      checklist.title,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text('کد چک‌لیست: ${checklist.code}'),
+                    Text('دسته‌بندی: ${checklist.category}'),
+                  ],
+                ),
+              ),
+            ),
+            ...checklist.sections.asMap().entries.map(
+              (entry) {
+                final sectionNumber = entry.key + 1;
+                final section = entry.value;
+
+                return Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    title: Text(
+                      '$sectionNumber. ${section.title}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    children: section.questions.asMap().entries.map(
+                      (questionEntry) final                        final questionNumber = questionEntry.key + 1;
+                        final question = questionEntry.value;
+
+                        return ListTile(
+                          leading: CircleAvatar(
+                            radius: 14,
+                            child: Text(
+                              '$questionNumber',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                          title: Text(question),
+                          trailing: const Icon(
+                            Icons.radio_button_unchecked,
+                          ),
+                        );
+                      },
+                    ).toList(),
+                  ),
                 );
               },
             ),
           ],
         ),
-        body: Column(
-          children: [
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: categories.map((cat) {
-                    final isSelected = _selectedCategory == cat;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: FilterChip(
-                        label: Text(cat),
-                        selected: isSelected,
-                        selectedColor: const Color(0xFF80CBC4),
-                        onSelected: (val) {
-                          setState(() {
-                            _selectedCategory = cat;
-                          });
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: displayedChecklists.length,
-                itemBuilder: (context, index) {
-                  final item = displayedChecklists[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(12),
-                      leading: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: const Color(0xFFE0F2F1),
-                        child: Icon(_getIconForCategory(item.category), color: const Color(0xFF00695C)),
-                      ),
-                      title: Text(
-                        item.title,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text('کد: ${item.code} | رسته: ${item.category}'),
-                          Text('تعداد بخش‌ها: ${item.sections.length} | سوالات: ${item.sections.fold<int>(0, (sum, sec) => sum + sec.questions.length)} مورد'),
-                        ],
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ChecklistDetailPage(
-                              checklist: item,
-                              checklistId: item.id,
-                              category: item.category,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
       ),
     );
-  }
-
-  IconData _getIconForCategory(String category) {
-    if (category.contains('برق')) return Icons.bolt;
-    if (category.contains('حریق')) return Icons.local_fire_department;
-    if (category.contains('ماشین') || category.contains('تجهیزات')) return Icons.precision_manufacturing;
-    if (category.contains('بهداشت')) return Icons.restaurant;
-    return Icons.assignment;
   }
 }
