@@ -1,151 +1,127 @@
 import 'package:flutter/material.dart';
-import '../core/models/answer_model.dart';
-import '../core/models/checklist_model.dart';
-import '../core/models/inspection_model.dart';
 import '../core/db/app_database.dart';
-import '../services/excel_export_service.dart';
-
-enum InspectionAnswerStatus { yes, no, notApplicable, needsAction }
-
-extension StatusExt on InspectionAnswerStatus {
-  String get label {
-    switch (this) {
-      case InspectionAnswerStatus.yes: return 'بلی';
-      case InspectionAnswerStatus.no: return 'خیر';
-      case InspectionAnswerStatus.notApplicable: return 'نامشمول';
-      case InspectionAnswerStatus.needsAction: return 'نیاز به اقدام';
-    }
-  }
-  String get dbValue {
-    switch (this) {
-      case InspectionAnswerStatus.yes: return 'yes';
-      case InspectionAnswerStatus.no: return 'no';
-      case InspectionAnswerStatus.notApplicable: return 'not_applicable';
-      case InspectionAnswerStatus.needsAction: return 'needs_action';
-    }
-  }
-}
+import '../core/models/inspection_model.dart';
+import '../core/models/answer_model.dart';
 
 class ChecklistDetailPage extends StatefulWidget {
-  const ChecklistDetailPage({super.key, required this.checklist});
-  final Checklist checklist;
+  final String checklistId;
+  final String title;
+  final String category;
+  final String code;
+
+  const ChecklistDetailPage({
+    super.key,
+    required this.checklistId,
+    required this.title,
+    required this.category,
+    this.code = '',
+  });
+
   @override
   State<ChecklistDetailPage> createState() => _ChecklistDetailPageState();
 }
 
 class _ChecklistDetailPageState extends State<ChecklistDetailPage> {
-  final Map<String, InspectionAnswerStatus?> _statuses = {};
-  final Map<String, TextEditingController> _notes = {};
-  bool _saving = false;
-  InspectionModel? _lastSavedInspection;
+  final Map<String, String> _answers = {};
+  final Map<String, String> _notes = {};
+  bool _isSaving = false;
 
-  @override
-  void initState() {
-    super.initState();
-    for (var q in widget.checklist.questions) {
-      _statuses[q.id] = null;
-      _notes[q.id] = TextEditingController();
-    }
-  }
+  Future<void> _saveInspection() async {
+    setState(() => _isSaving = true);
+    final db = await AppDatabase.instance.database;
+    final String inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
+    final DateTime now = DateTime.now();
 
-  Future<void> _submit() async {
-    setState(() => _saving = true);
-    try {
-      final String id = DateTime.now().millisecondsSinceEpoch.toString();
-      final answers = widget.checklist.questions.map((q) => AnswerModel(
-        questionId: q.id,
-        status: _statuses[q.id]?.dbValue ?? '',
-        note: _notes[q.id]!.text.trim(),
-      )).toList();
+    final inspection = InspectionModel(
+      id: inspectionId,
+      checklistId: widget.checklistId,
+      checklistTitle: widget.title,
+      checklistCode: widget.code,
+      checklistCategory: widget.category,
+      status: InspectionStatus.completed,
+      createdAt: now,
+    );
 
-      final inspection = InspectionModel(
-        id: id,
-        checklistId: widget.checklist.id,
-        checklistTitle: widget.checklist.title,
-        checklistCategory: widget.checklist.category,
-        createdAt: DateTime.now(),
-        status: 'submitted',
-        answers: answers,
+    await db.insert(AppDatabase.instance.inspectionsTable, inspection.toDbMap());
+
+    for (var entry in _answers.entries) {
+      final answer = AnswerModel(
+        id: '${inspectionId}_${entry.key}',
+        inspectionId: inspectionId,
+        questionId: entry.key,
+        status: entry.value,
+        note: _notes[entry.key] ?? '',
+        answeredAt: now.toIso8601String(),
       );
-
-      final db = await AppDatabase.instance.database;
-      await db.insert(AppDatabase.inspectionsTable, inspection.toDbMap());
-      for (var a in answers) {
-        await db.insert(AppDatabase.answersTable, a.toDbMap(inspectionId: id));
-      }
-
-      setState(() => _lastSavedInspection = inspection);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ذخیره شد.')));
-    } finally {
-      setState(() => _saving = false);
+      await db.insert(AppDatabase.instance.answersTable, answer.toDbMap());
     }
+
+    if (!mounted) return;
+    setState(() => _isSaving = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('بازرسی با موفقیت ذخیره شد')),
+    );
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.checklist.title)),
-      body: Column(
-        children: [
-          if (_lastSavedInspection != null)
-            Container(
-              color: Colors.green.shade50,
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: _isSaving
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  const Text('بازرسی با موفقیت ثبت شد.', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                  FilledButton.icon(
-                    onPressed: () => ExcelExportService.exportInspection(_lastSavedInspection!),
-                    icon: const Icon(Icons.download),
-                    label: const Text('خروجی اکسل'),
-                    style: FilledButton.styleFrom(backgroundColor: Colors.green),
+                  Expanded(
+                    child: ListView(
+                      children: [
+                        Text('کد: ${widget.code} | دسته: ${widget.category}',
+                            style: const TextStyle(color: Colors.grey)),
+                        const SizedBox(height: 20),
+                        const Text('ثبت وضعیت سوالات:'),
+                        const SizedBox(height: 10),
+                        // نمونه آیتم برای ثبت بازرسی
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('۱. وضعیت کلی و ایمنی تجهیز:'),
+                                Row(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () => setState(() => _answers['q1'] = 'انطباق'),
+                                      child: const Text('انطباق'),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    ElevatedButton(
+                                      onPressed: () => setState(() => _answers['q1'] = 'عدم انطباق'),
+                                      child: const Text('عدم انطباق'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _saveInspection,
+                      child: const Text('ذخیره نهایی بازرسی'),
+                    ),
                   ),
                 ],
               ),
             ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: widget.checklist.questions.length,
-              itemBuilder: (ctx, i) {
-                final q = widget.checklist.questions[i];
-                return Card(
-                  margin: const EdgeInsets.all(8),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${i + 1}. ${q.text}'),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: InspectionAnswerStatus.values.map((s) => ChoiceChip(
-                            label: Text(s.label),
-                            selected: _statuses[q.id] == s,
-                            onSelected: (val) => setState(() => _statuses[q.id] = val ? s : null),
-                          )).toList(),
-                        ),
-                        TextField(controller: _notes[q.id], decoration: const InputDecoration(hintText: 'توضیحات...')),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: _saving ? null : _submit,
-                child: Text(_saving ? 'در حال ذخیره...' : 'ثبت نهایی بازرسی'),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
