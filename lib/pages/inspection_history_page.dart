@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../core/db/app_database.dart';
 import '../core/models/inspection_model.dart';
+import '../core/db/app_database.dart';
 import '../services/excel_export_service.dart';
 
 class InspectionHistoryPage extends StatefulWidget {
@@ -11,9 +11,8 @@ class InspectionHistoryPage extends StatefulWidget {
 }
 
 class _InspectionHistoryPageState extends State<InspectionHistoryPage> {
-  List<InspectionModel> _inspections = [];
-  bool _isLoading = true;
-  String _searchQuery = '';
+  late Future<List<InspectionModel>> _inspectionsFuture;
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -21,110 +20,130 @@ class _InspectionHistoryPageState extends State<InspectionHistoryPage> {
     _loadInspections();
   }
 
-  Future<void> _loadInspections() async {
-    setState(() => _isLoading = true);
+  void _loadInspections() {
+    setState(() {
+      _inspectionsFuture = AppDatabase.instance.getAllInspections();
+    });
+  }
+
+  Future<void> _exportToExcel(List<InspectionModel> list) async {
+    if (list.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('هیچ بازرسی ثبت‌شده‌ای برای خروجی اکسل وجود ندارد.')),
+      );
+      return;
+    }
+
+    setState(() => _isExporting = true);
     try {
-      final data = await AppDatabase.instance.getAllInspections();
+      final path = await ExcelExportService.exportInspections(list);
       if (!mounted) return;
-      setState(() {
-        _inspections = data;
-        _isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('فایل اکسل با موفقیت ایجاد و ذخیره شد:\n$path'),
+          backgroundColor: Colors.green[700],
+          duration: const Duration(seconds: 4),
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('خطا در بارگذاری اطلاعات: $e')),
+        SnackBar(
+          content: Text('خطا در صدور فایل اکسل: $e'),
+          backgroundColor: Colors.red[700],
+        ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
     }
   }
 
-  Future<void> _deleteInspection(String id) async {
+  Future<void> _deleteInspection(int id) async {
     await AppDatabase.instance.deleteInspection(id);
-    if (!mounted) return;
-    await _loadInspections();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('بازرسی با موفقیت حذف شد')),
-    );
+    _loadInspections();
   }
 
   @override
   Widget build(BuildContext context) {
-    final query = _searchQuery.trim().toLowerCase();
-    final filtered = _inspections.where((item) {
-      final title = (item.checklistTitle ?? item.title ?? '').toLowerCase();
-      final category = item.checklistCategory.toLowerCase();
-      final id = item.id.toLowerCase();
-      return title.contains(query) || category.contains(query) || id.contains(query);
-    }).toList();
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('تاریخچه بازرسی‌ها'),
+          centerTitle: true,
+        ),
+        body: FutureBuilder<List<InspectionModel>>(
+          future: _inspectionsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('تاریخچه بازرسی‌ها'),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'جستجو بر اساس عنوان، دسته یا شناسه...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+            final list = snapshot.data ?? [];
+
+            if (list.isEmpty) {
+              return const Center(
+                child: Text(
+                  'هنوز بازرسی ثبت نشده است.\nاز صفحه اصلی یک چک‌لیست را انتخاب و بازرسی را شروع کنید.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-              onChanged: (val) => setState(() => _searchQuery = val),
-            ),
-          ),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : filtered.isEmpty
-                    ? const Center(child: Text('موردی یافت نشد'))
-                    : ListView.separated(
-                        itemCount: filtered.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final item = filtered[index];
-                          final dateStr = item.createdAt.toIso8601String().split('T').first;
-                          final displayTitle = (item.checklistTitle != null && item.checklistTitle!.isNotEmpty)
-                              ? item.checklistTitle!
-                              : (item.title != null && item.title!.isNotEmpty ? item.title! : 'بدون عنوان');
+              );
+            }
 
-                          return ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.assignment_turned_in),
-                            ),
-                            title: Text(
-                              displayTitle,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text('دسته: ${item.checklistCategory} | تاریخ: $dateStr\nتعداد پاسخ‌ها: ${item.answers.length} | وضعیت: ${item.status.name}'),
-                            isThreeLine: true,
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.file_download, color: Colors.green),
-                                  tooltip: 'خروجی اکسل',
-                                  onPressed: () => ExcelExportService.exportInspection(item),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  tooltip: 'حذف',
-                                  onPressed: () => _deleteInspection(item.id),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-          ),
-        ],
+            return Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  child: ElevatedButton.icon(
+                    onPressed: _isExporting ? null : () => _exportToExcel(list),
+                    icon: _isExporting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          )
+                        : const Icon(Icons.table_chart),
+                    label: Text(_isExporting ? 'در حال تهیه خروجی...' : 'دریافت خروجی جامع اکسل'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green[800],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: list.length,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemBuilder: (context, index) {
+                      final item = list[index];
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          title: Text(item.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          subtitle: Text('کد: ${item.checklistCode} | تاریخ: ${item.date} | وضعیت: ${item.status}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            onPressed: () {
+                              if (item.id != null) {
+                                _deleteInspection(item.id!);
+                              }
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
