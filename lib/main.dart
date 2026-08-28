@@ -25,12 +25,8 @@ class HseInspectionApp extends StatelessWidget {
             vertical: 6,
           ),
         ),
-        inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(),
-          filled: true,
-          fillColor: Colors.white,
-        ),
-HomePage extends Stateless: const ChecklistHomePage(),
+      ),
+      home: const ChecklistHomePage(),
     );
   }
 }
@@ -40,10 +36,11 @@ class ChecklistHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categories = SeedLoader.categories;
+    final List<String> categories = SeedLoader.categories;
 
     return Directionality(
-      textDirection: TextDirection.rtl,
+,
+      child: ScaffoldDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('بازرسی ایمنی و بهداشت'),
@@ -53,12 +50,13 @@ class ChecklistHomePage extends StatelessWidget {
             ? const Center(
                 child: Text('هیچ چک‌لیستی ثبت نشده است.'),
               )
-            :هیچ چک‌لیستی ثبت نشده است.'),
-              )
-            :                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final checklists = SeedLoader.getByCategory(category);
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemCount: categories.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final String category = categories[index];
+                  final List<ChecklistItem> checklists =
+                      SeedLoader.getByCategory(category);
 
                   return Card(
                     child: ExpansionTile(
@@ -75,32 +73,35 @@ class ChecklistHomePage extends StatelessWidget {
                       subtitle: Text(
                         '${checklists.length} چک‌لیست',
                       ),
-                      children: checklists
-                          .map(
-                            (checklist) => ListTile(
-                              leading: const Icon(
-                                Icons.checklist,
-                                color: Colors.green,
-                              ),
-                              title: Text(checklist.title),
-                              subtitle: Text(checklist.code),
-                              trailing: const Icon(
-                                Icons.arrow_back_ios,
-                                size: 16,
-                              ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => ChecklistPreviewPage(
-                                      checklist: checklist,
-                                    ),
-                                  ),
-                                );
-                              },
+                      children: checklists.mapلیست',
+                      ),
+                      children: checklists.map<Widget>(
+                        (ChecklistItem checklist Icon(
+                              Icons.checklist,
+                              color: Colors.green,
                             ),
-                          )
-                          .toList(),
+                            title: Text(checklist.title),
+                            subtitle: Text(checklist.code),
+                            trailing: const Icon(
+                              Icons.arrow_back_ios,
+                              size: 16,
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) {
+                                    return ChecklistPreviewPage(
+                                    );
+                                  },
+                                ),
+                              );
+                                                           ),
+                              );
+                            },
+                          );
+                        },
+                      ).toList(),
                     ),
                   );
                 },
@@ -120,21 +121,66 @@ class ChecklistPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> sectionWidgets = <Widget>[
+      ...checklist.sections.asMap().entries.map<Widget>(
+        (MapEntry<int, ChecklistSection> entry) {
+          final int sectionNumber = entry.key + 1;
+          final ChecklistSection section = entry.value;
+
+          final List<Widget> questionWidgets =
+              section.questions.asMap().entries.map<Widget>(
+            (MapEntry<int, String> questionEntry) {
+              final int questionNumber = questionEntry.key + 1;
+              final String question = questionEntry.value;
+
+              return ListTile(
+                leading: CircleAvatar(
+                  radius: 14,
+                  child: Text(
+                    '$questionNumber',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+                title: Text(question),
+                trailing: const Icon(
+                  Icons.radio_button_unchecked,
+                ),
+              );
+            },
+          ).toList();
+
+          return Card(
+            child: ExpansionTile(
+              initiallyExpanded: true,
+              title: Text(
+                '$sectionNumber. ${section.title}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              children: questionWidgets,
+            ),
+          );
+        },
+      ),
+    ];
+
     return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
+      textDirection: TextDirection.r.title),
+        ),
+        Scaffold(
         appBar: AppBar(
           title: Text(checklist.title),
         ),
         body: ListView(
           padding: const EdgeInsets.all(12),
-          children: [
+          children: <Widget>[
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Text(
                       checklist.title,
                       style: Theme.of(context).textTheme.titleLarge,
@@ -146,43 +192,7 @@ class ChecklistPreviewPage extends StatelessWidget {
                 ),
               ),
             ),
-            ...checklist.sections.asMap().entries.map(
-              (entry) {
-                final sectionNumber = entry.key + 1;
-                final section = entry.value;
-
-                return Card(
-                  child: ExpansionTile(
-                    initiallyExpanded: true,
-                    title: Text(
-                      '$sectionNumber. ${section.title}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    children: section.questions.asMap().entries.map(
-                      (questionEntry) final                        final questionNumber = questionEntry.key + 1;
-                        final question = questionEntry.value;
-
-                        return ListTile(
-                          leading: CircleAvatar(
-                            radius: 14,
-                            child: Text(
-                              '$questionNumber',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
-                          title: Text(question),
-                          trailing: const Icon(
-                            Icons.radio_button_unchecked,
-                          ),
-                        );
-                      },
-                    ).toList(),
-                  ),
-                );
-              },
-            ),
+            ...sectionWidgets,
           ],
         ),
       ),
