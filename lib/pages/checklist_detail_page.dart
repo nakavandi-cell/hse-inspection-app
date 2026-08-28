@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../data/models/checklist_model.dart';
 import '../core/models/inspection_model.dart';
 import '../core/db/app_database.dart';
 import '../features/inspections/presentation/pages/dynamic_inspection_page.dart';
@@ -24,45 +23,41 @@ class _ChecklistDetailPageState extends State<ChecklistDetailPage> {
   bool _isLoading = false;
 
   String get _title {
-    if (widget.checklist is Checklist) {
-      return (widget.checklist as Checklist).title;
-    }
-    if (widget.checklist != null && widget.checklist.title != null) {
-      return widget.checklist.title.toString();
-    }
+    try {
+      if (widget.checklist != null && widget.checklist.title != null) {
+        return widget.checklist.title.toString();
+      }
+    } catch (_) {}
     return 'جزئیات چک‌لیست';
   }
 
   String get _code {
-    if (widget.checklist is Checklist) {
-      return (widget.checklist as Checklist).code;
-    }
-    if (widget.checklist != null && widget.checklist.code != null) {
-      return widget.checklist.code.toString();
-    }
+    try {
+      if (widget.checklist != null && widget.checklist.code != null) {
+        return widget.checklist.code.toString();
+      }
+    } catch (_) {}
     return '';
   }
 
   String get _id {
-    if (widget.checklist is Checklist) {
-      return (widget.checklist as Checklist).id;
-    }
-    if (widget.checklistId != null) {
+    if (widget.checklistId != null && widget.checklistId!.isNotEmpty) {
       return widget.checklistId!;
     }
-    if (widget.checklist != null && widget.checklist.id != null) {
-      return widget.checklist.id.toString();
-    }
-    return '';
+    try {
+      if (widget.checklist != null && widget.checklist.id != null) {
+        return widget.checklist.id.toString();
+      }
+    } catch (_) {}
+    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   List<dynamic> get _sections {
-    if (widget.checklist is Checklist) {
-      return (widget.checklist as Checklist).sections;
-    }
-    if (widget.checklist != null && widget.checklist.sections != null) {
-      return widget.checklist.sections as List<dynamic>;
-    }
+    try {
+      if (widget.checklist != null && widget.checklist.sections != null) {
+        return widget.checklist.sections as List<dynamic>;
+      }
+    } catch (_) {}
     return [];
   }
 
@@ -71,7 +66,7 @@ class _ChecklistDetailPageState extends State<ChecklistDetailPage> {
     try {
       final now = DateTime.now();
       final dateStr = '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
-      
+
       final newInspection = InspectionModel(
         title: 'بازرسی $_title',
         date: dateStr,
@@ -191,37 +186,52 @@ class _ChecklistDetailPageState extends State<ChecklistDetailPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'بخش‌های این چک‌لیست:',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: sections.length,
-                  itemBuilder: (context, index) {
-                    final section = sections[index];
-                    final sectionTitle = section is Section
-                        ? section.title
-                        : (section.title?.toString() ?? 'بخش ${index + 1}');
-                    final questionsCount = section is Section
-                        ? section.questions.length
-                        : (section.questions != null ? (section.questions as List).length : 0);
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                          child: Text('${index + 1}'),
-                        ),
-                        title: Text(sectionTitle),
-                        subtitle: Text('$questionsCount سوال / آیتم کنترلی'),
-                      ),
-                    );
-                  },
+              if (sections.isNotEmpty) ...[
+                const Text(
+                  'بخش‌های این چک‌لیست:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-              ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: sections.length,
+                    itemBuilder: (context, index) {
+                      final section = sections[index];
+                      String sectionTitle = 'بخش ${index + 1}';
+                      int questionsCount = 0;
+
+                      try {
+                        if (section.title != null) {
+                          sectionTitle = section.title.toString();
+                        }
+                        if (section.questions != null) {
+                          questionsCount = (section.questions as List).length;
+                        }
+                      } catch (_) {}
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                            child: Text('${index + 1}'),
+                          ),
+                          title: Text(sectionTitle),
+                          subtitle: Text('$questionsCount سوال / آیتم کنترلی'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ] else
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      'آماده بازرسی مستقیم',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
