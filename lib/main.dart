@@ -18,8 +18,8 @@ class HseInspectionApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFFF5F7FA),
-        cardTheme: const CardThemeData(
-          elevation: 2,
+        cardTheme:: 12,
+            vertical:: 2,
           margin: EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 6,
@@ -32,15 +32,14 @@ class HseInspectionApp extends StatelessWidget {
 }
 
 class ChecklistHomePage extends StatelessWidget {
-  const ChecklistHomePage({super.key});
+  const Checklist List<String> categories = SeedLoader.categories;
 
-  @override
-  Widget build(BuildContext context) {
+    return Directionality(
+      text) {
     final List<String> categories = SeedLoader.categories;
 
     return Directionality(
-,
-      child: ScaffoldDirection.rtl,
+      textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('بازرسی ایمنی و بهداشت'),
@@ -70,38 +69,33 @@ class ChecklistHomePage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      subtitle: Text(
-                        '${checklists.length} چک‌لیست',
-                      ),
-                      children: checklists.mapلیست',
-                      ),
-                      children: checklists.map<Widget>(
-                        (ChecklistItem checklist Icon(
-                              Icons.checklist,
-                              color: Colors.green,
-                            ),
-                            title: Text(checklist.title),
-                            subtitle: Text(checklist.code),
-                            trailing: const Icon(
-                              Icons.arrow_back_ios,
-                              size: 16,
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) {
-                                    return ChecklistPreviewPage(
-                                    );
-                                  },
-                                ),
-                              );
-                                                           ),
-                              );
-                            },
-                          );
-                        },
-                      ).toList(),
+                      subtitle: Text('${checklists.length} چک‌لیست'),
+                      children: checklists.map<Widget>((ChecklistItem checklist) {
+                        return ListTile(
+                          leading: const Icon(
+                            Icons.checklist,
+                            color: Colors.green,
+                          ),
+                          title: Text(checklist.title),
+                          subtitle: Text(checklist.code),
+                          trailing: const Icon(
+                            Icons.arrow_back_ios,
+                            size: 16,
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute<void>(
+                                builder: (BuildContext context) {
+                                  return ChecklistPreviewPage(
+                                    checklist: checklist,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      }).toList(),
                     ),
                   );
                 },
@@ -112,63 +106,61 @@ class ChecklistHomePage extends StatelessWidget {
 }
 
 class ChecklistPreviewPage extends StatelessWidget {
-  final ChecklistItem checklist;
+  final ChecklistItem checklist checklist;
 
-  const ChecklistPreviewPage({
+  constPreviewPage({
     super.key,
     required this.checklist,
   });
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> sectionWidgets = <Widget>[
-      ...checklist.sections.asMap().entries.map<Widget>(
-        (MapEntry<int, ChecklistSection> entry) {
-          final int sectionNumber = entry.key + 1;
-          final ChecklistSection section = entry.value;
+    final List<Widget> sectionWidgets = checklist.sections
+        .asMap()
+        .entries
+        .map<Widget>((MapEntry<int, ChecklistSection> entry) {
+      final int sectionNumber = entry.key + 1;
+      final ChecklistSection section = entry.value;
 
-          final List<Widget> questionWidgets =
-              section.questions.asMap().entries.map<Widget>(
-            (MapEntry<int, String> questionEntry) {
-              final int questionNumber = questionEntry.key + 1;
-              final String question = questionEntry.value;
+      final List<Widget> questionWidgets = section.questions
+          .asMap()
+          .entries
+          .map<Widget>((MapEntry<int, String> questionEntry) {
+        final int questionNumber = questionEntry.key + 1;
+        final String question = questionEntry.value;
 
-              return ListTile(
-                leading: CircleAvatar(
-                  radius: 14,
-                  child: Text(
-                    '$questionNumber',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ),
-                title: Text(question),
-                trailing: const Icon(
-                  Icons.radio_button_unchecked,
-                ),
-              );
-            },
-          ).toList();
-
-          return Card(
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              title: Text(
-                '$sectionNumber. ${section.title}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              children: questionWidgets,
+        return ListTile(
+          leading: CircleAvatar(
+            radius: 14,
+            child: Text(
+              '$questionNumber',
+              style: const TextStyle(fontSize: 12),
             ),
-          );
-        },
-      ),
-    ];
+          ),
+          title: Text(question),
+          trailing: const Icon(
+            Icons.radio_button_unchecked,
+          ),
+        );
+      }).toList();
+
+      return Card(
+        child: ExpansionTile(
+          initiallyExpanded: true,
+          title: Text(
+            '$sectionNumber. ${section.title}',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          children: questionWidgets,
+        ),
+      );
+    }).toList();
 
     return Directionality(
-      textDirection: TextDirection.r.title),
-        ),
-        Scaffold(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
         appBar: AppBar(
           title: Text(checklist.title),
         ),
