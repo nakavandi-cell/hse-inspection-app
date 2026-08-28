@@ -1,126 +1,91 @@
-import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import '../models/inspection_model.dart';
+import '../models/answer_model.dart';
 
 class AppDatabase {
-  AppDatabase._();
+  static final AppDatabase instance = AppDatabase._init();
+  static Database? _database;
 
-  static final AppDatabase instance = AppDatabase._();
+  AppDatabase._init();
 
-  static const String _dbName = 'hse_inspection.db';
-
-  // Version 2:
-  // افزودن ستون‌های comment و answered_at به جدول answers
-  static const int _dbVersion = 2;
-
-  Database? _database;
+  String get inspectionsTable => 'inspections';
+  String get answersTable => 'answers';
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-
-    _database = await _initDatabase();
+    _database = await _initDB('hse_inspection.db');
     return _database!;
   }
 
-  Future<Database> _initDatabase() async {
+  Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
-    final path = join(dbPath, _dbName);
+    final path = join(dbPath, filePath);
 
-    return openDatabase(
+    return await openDatabase(
       path,
-      version: _dbVersion,
-      onConfigure: _onConfigure,
-      onCreate: _onCreate,
+      version: 2,
+      onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
   }
 
-  /// فعال‌سازی Foreign Key در SQLite.
-  /// بدون این بخش، ON DELETE CASCADE ممکن است اجرا نشود.
-  Future<void> _onConfigure(Database db) async {
-    await db.execute('PRAGMA foreign_keys = ON');
-  }
-
-  Future<void> _onCreate(Database db, int version) async {
+  Future _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE inspections (
         id TEXT PRIMARY KEY,
-        title TEXT NOT NULL,
-        date TEXT NOT NULL,
-        status TEXT NOT NULL,
-        checklist_id TEXT,
-        checklist_title TEXT,
-        checklist_code TEXT
+        title TEXT,
+        checklistId TEXT,
+        checklistTitle TEXT,
+        checklistCode TEXT,
+        checklistCategory TEXT,
+        status TEXT,
+        createdAt TEXT,
+        date TEXT
       )
     ''');
 
     await db.execute('''
       CREATE TABLE answers (
         id TEXT PRIMARY KEY,
-        inspection_id TEXT NOT NULL,
-        question_id TEXT NOT NULL,
-        answer_value TEXT NOT NULL,
-        comment TEXT,
-        answered_at TEXT,
-        FOREIGN KEY (inspection_id)
-          REFERENCES inspections (id)
-          ON DELETE CASCADE
+        inspectionId TEXT,
+        questionId TEXT,
+        status TEXT,
+        note TEXT,
+        answeredAt TEXT
       )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE equipments (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        category TEXT NOT NULL,
-        location TEXT,
-        is_active INTEGER NOT NULL
-      )
-    ''');
-
-    await db.execute('''
-      CREATE INDEX idx_answers_inspection_id
-      ON answers (inspection_id)
-    ''');
-
-    await db.execute('''
-      CREATE INDEX idx_answers_question_id
-      ON answers (question_id)
     ''');
   }
 
-  Future<void> _onUpgrade(
-    Database db,
-    int oldVersion,
-    int newVersion,
-  ) async {
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      await db.execute('''
-        ALTER TABLE answers
-        ADD COLUMN comment TEXT
-      ''');
-
-      await db.execute('''
-        ALTER TABLE answers
-        ADD COLUMN answered_at TEXT
-      ''');
-
-      await db.execute('''
-        CREATE INDEX IF NOT EXISTS idx_answers_inspection_id
-        ON answers (inspection_id)
-      ''');
-
-      await db.execute('''
-        CREATE INDEX IF NOT EXISTS idx_answers_question_id
-        ON answers (question_id)
-      ''');
+      await db.execute('DROP TABLE IF EXISTS inspections');
+      await db.execute('DROP TABLE IF EXISTS answers');
+      await _createDB(db, newVersion);
     }
   }
 
-  Future<void> close() async {
-    final db = _database;
-    if (db != null) {
-      await db.close();
-      _database = null;
+  Future<List<InspectionModel>> getAllInspections() async {
+    final db = await database;
+    final inspectionMaps = await db.query('inspections', orderBy: 'createdAt DESC');
+    
+    final List<InspectionModel> results = [];
+    for (var map in inspectionMaps) {
+      final id = map['id'].toString();
+      final answerMaps = await db.query(
+        'answers',
+        where: 'inspectionId = ?',
+        whereArgs: [id],
+      );
+      final answers = answerMaps.map((a) => AnswerModel.fromDbMap(a)).toList();
+      results.add(InspectionModel.fromDbMap(map, answers: answers));
     }
+    return results;
+  }
+
+  Future<int> deleteInspection(String id) async {
+    final db = await database;
+    await db.delete('answers', where: 'inspectionId = ?', whereArgs: [id]);
+    return await db.delete('inspections', where: 'id = ?', whereArgs: [id]);
   }
 }
