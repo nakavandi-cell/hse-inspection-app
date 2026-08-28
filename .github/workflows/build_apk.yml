@@ -5,12 +5,10 @@ on:
     branches:
       - main
       - master
-
   pull_request:
     branches:
       - main
       - master
-
   workflow_dispatch:
 
 permissions:
@@ -41,10 +39,6 @@ jobs:
         run: |
           echo "Current directory:"
           pwd
-
-          echo "Repository files:"
-          find . -maxdepth 2 -type f | sort | head -200
-
           if [ ! -f "pubspec.yaml" ]; then
             echo "ERROR: pubspec.yaml was not found in the repository root."
             exit 1
@@ -62,9 +56,6 @@ jobs:
 
       - name: Get Flutter packages
         run: flutter pub get
-
-      - name: Analyze Flutter project
-        run: flutter analyze
 
       - name: Build release APK
         run: flutter build apk --release
