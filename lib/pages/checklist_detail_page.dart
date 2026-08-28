@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import '../core/db/app_database.dart';
+import '../data/models/checklist_model.dart';
 import '../core/models/inspection_model.dart';
-import '../core/models/answer_model.dart';
+import '../core/db/app_database.dart';
+import '../features/inspections/presentation/pages/dynamic_inspection_page.dart';
 
 class ChecklistDetailPage extends StatefulWidget {
-  final String checklistId;
-  final String title;
-  final String category;
-  final String code;
+  final dynamic checklist;
+  final String? checklistId;
+  final String? category;
 
   const ChecklistDetailPage({
     super.key,
-    required this.checklistId,
-    required this.title,
-    required this.category,
-    this.code = '',
+    this.checklist,
+    this.checklistId,
+    this.category,
   });
 
   @override
@@ -22,106 +21,211 @@ class ChecklistDetailPage extends StatefulWidget {
 }
 
 class _ChecklistDetailPageState extends State<ChecklistDetailPage> {
-  final Map<String, String> _answers = {};
-  final Map<String, String> _notes = {};
-  bool _isSaving = false;
+  bool _isLoading = false;
 
-  Future<void> _saveInspection() async {
-    setState(() => _isSaving = true);
-    final db = await AppDatabase.instance.database;
-    final String inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
-    final DateTime now = DateTime.now();
-
-    final inspection = InspectionModel(
-      id: inspectionId,
-      checklistId: widget.checklistId,
-      checklistTitle: widget.title,
-      checklistCode: widget.code,
-      checklistCategory: widget.category,
-      status: InspectionStatus.completed,
-      createdAt: now,
-    );
-
-    await db.insert(AppDatabase.instance.inspectionsTable, inspection.toDbMap());
-
-    for (var entry in _answers.entries) {
-      final answer = AnswerModel(
-        id: '${inspectionId}_${entry.key}',
-        inspectionId: inspectionId,
-        questionId: entry.key,
-        status: entry.value,
-        note: _notes[entry.key] ?? '',
-        answeredAt: now.toIso8601String(),
-      );
-      await db.insert(AppDatabase.instance.answersTable, answer.toDbMap());
+  String get _title {
+    if (widget.checklist is Checklist) {
+      return (widget.checklist as Checklist).title;
     }
+    if (widget.checklist != null && widget.checklist.title != null) {
+      return widget.checklist.title.toString();
+    }
+    return 'جزئیات چک‌لیست';
+  }
 
-    if (!mounted) return;
-    setState(() => _isSaving = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('بازرسی با موفقیت ذخیره شد')),
-    );
-    Navigator.of(context).pop();
+  String get _code {
+    if (widget.checklist is Checklist) {
+      return (widget.checklist as Checklist).code;
+    }
+    if (widget.checklist != null && widget.checklist.code != null) {
+      return widget.checklist.code.toString();
+    }
+    return '';
+  }
+
+  String get _id {
+    if (widget.checklist is Checklist) {
+      return (widget.checklist as Checklist).id;
+    }
+    if (widget.checklistId != null) {
+      return widget.checklistId!;
+    }
+    if (widget.checklist != null && widget.checklist.id != null) {
+      return widget.checklist.id.toString();
+    }
+    return '';
+  }
+
+  List<dynamic> get _sections {
+    if (widget.checklist is Checklist) {
+      return (widget.checklist as Checklist).sections;
+    }
+    if (widget.checklist != null && widget.checklist.sections != null) {
+      return widget.checklist.sections as List<dynamic>;
+    }
+    return [];
+  }
+
+  Future<void> _startInspection() async {
+    setState(() => _isLoading = true);
+    try {
+      final now = DateTime.now();
+      final dateStr = '${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')}';
+      
+      final newInspection = InspectionModel(
+        title: 'بازرسی $_title',
+        date: dateStr,
+        status: 'in_progress',
+        checklistId: _id,
+        checklistTitle: _title,
+        checklistCode: _code,
+        checklistCategory: widget.category,
+        createdAt: now,
+      );
+
+      final id = await AppDatabase.instance.insertInspection(newInspection);
+      final savedInspection = newInspection.copyWith(id: id);
+
+      if (!mounted) return;
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DynamicInspectionPage(
+            checklist: widget.checklist,
+            checklistId: _id,
+            checklistTitle: _title,
+            checklistCode: _code,
+            inspection: savedInspection,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطا در شروع بازرسی: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: _isSaving
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        Text('کد: ${widget.code} | دسته: ${widget.category}',
-                            style: const TextStyle(color: Colors.grey)),
-                        const SizedBox(height: 20),
-                        const Text('ثبت وضعیت سوالات:'),
-                        const SizedBox(height: 10),
-                        // نمونه آیتم برای ثبت بازرسی
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('۱. وضعیت کلی و ایمنی تجهیز:'),
-                                Row(
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () => setState(() => _answers['q1'] = 'انطباق'),
-                                      child: const Text('انطباق'),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    ElevatedButton(
-                                      onPressed: () => setState(() => _answers['q1'] = 'عدم انطباق'),
-                                      child: const Text('عدم انطباق'),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+    final sections = _sections;
+
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(_title),
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (_code.isNotEmpty)
+                        Text(
+                          'کد مدرک: $_code',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
                           ),
                         ),
-                      ],
-                    ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'تعداد بخش‌ها: ${sections.length}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _saveInspection,
-                      child: const Text('ذخیره نهایی بازرسی'),
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _isLoading ? null : _startInspection,
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Icon(Icons.play_arrow),
+                label: Text(
+                  _isLoading ? 'در حال ایجاد...' : 'شروع بازرسی جدید',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'بخش‌های این چک‌لیست:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: sections.length,
+                  itemBuilder: (context, index) {
+                    final section = sections[index];
+                    final sectionTitle = section is Section
+                        ? section.title
+                        : (section.title?.toString() ?? 'بخش ${index + 1}');
+                    final questionsCount = section is Section
+                        ? section.questions.length
+                        : (section.questions != null ? (section.questions as List).length : 0);
+
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                          child: Text('${index + 1}'),
+                        ),
+                        title: Text(sectionTitle),
+                        subtitle: Text('$questionsCount سوال / آیتم کنترلی'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
