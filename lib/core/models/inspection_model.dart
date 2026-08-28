@@ -1,93 +1,123 @@
-import 'inspection_status.dart';
+import 'answer_model.dart';
+
+enum InspectionStatus {
+  draft,
+  inProgress,
+  completed,
+}
+
+extension InspectionStatusExtension on InspectionStatus {
+  String get name {
+    switch (this) {
+      case InspectionStatus.draft:
+        return 'draft';
+      case InspectionStatus.inProgress:
+        return 'inProgress';
+      case InspectionStatus.completed:
+        return 'completed';
+    }
+  }
+
+  static InspectionStatus fromString(String? val) {
+    if (val == null) return InspectionStatus.draft;
+    final lower = val.toLowerCase();
+    if (lower.contains('comp')) return InspectionStatus.completed;
+    if (lower.contains('prog')) return InspectionStatus.inProgress;
+    return InspectionStatus.draft;
+  }
+}
 
 class InspectionModel {
   final String id;
-  final String title;
-  final DateTime date;
-  final InspectionStatus status;
+  final String? title;
   final String? checklistId;
   final String? checklistTitle;
   final String? checklistCode;
+  final String checklistCategory;
+  final InspectionStatus status;
+  final DateTime createdAt;
+  final List<AnswerModel> answers;
 
   const InspectionModel({
     required this.id,
-    required this.title,
-    required this.date,
-    required this.status,
+    this.title,
     this.checklistId,
     this.checklistTitle,
     this.checklistCode,
-  });
+    this.checklistCategory = 'عمومی',
+    this.status = InspectionStatus.draft,
+    DateTime? createdAt,
+    this.answers = const <AnswerModel>[],
+  }) : createdAt = createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
 
-  factory InspectionModel.fromJson(Map<String, dynamic> json) {
+  DateTime get date => createdAt;
+
+  factory InspectionModel.fromDbMap(
+    Map<String, dynamic> map, {
+    List<AnswerModel> answers = const <AnswerModel>[],
+  }) {
+    DateTime parsedDate = DateTime.now();
+    if (map['createdAt'] != null) {
+      parsedDate = DateTime.tryParse(map['createdAt'].toString()) ?? DateTime.now();
+    } else if (map['created_at'] != null) {
+      parsedDate = DateTime.tryParse(map['created_at'].toString()) ?? DateTime.now();
+    } else if (map['date'] != null) {
+      parsedDate = DateTime.tryParse(map['date'].toString()) ?? DateTime.now();
+    }
+
+    final rawStatus = map['status'];
+    final InspectionStatus st = rawStatus is InspectionStatus
+        ? rawStatus
+        : InspectionStatusExtension.fromString(rawStatus?.toString());
+
     return InspectionModel(
-      id: (json['id'] ?? '').toString(),
-      title: (json['title'] ?? '').toString(),
-      date: json['date'] == null
-          ? DateTime.now()
-          : DateTime.tryParse(json['date'].toString()) ?? DateTime.now(),
-      status: InspectionStatusX.fromValue(json['status']?.toString()),
-      checklistId: json['checklistId']?.toString(),
-      checklistTitle: json['checklistTitle']?.toString(),
-      checklistCode: json['checklistCode']?.toString(),
+      id: (map['id'] ?? '').toString(),
+      title: map['title']?.toString(),
+      checklistId: (map['checklistId'] ?? map['checklist_id'])?.toString(),
+      checklistTitle: (map['checklistTitle'] ?? map['checklist_title'] ?? map['title'] ?? '').toString(),
+      checklistCode: (map['checklistCode'] ?? map['checklist_code'])?.toString(),
+      checklistCategory: (map['checklistCategory'] ?? map['checklist_category'] ?? 'عمومی').toString(),
+      status: st,
+      createdAt: parsedDate,
+      answers: answers,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'date': date.toIso8601String(),
-      'status': status.value,
-      if (checklistId != null) 'checklistId': checklistId,
-      if (checklistTitle != null) 'checklistTitle': checklistTitle,
-      if (checklistCode != null) 'checklistCode': checklistCode,
-    };
   }
 
   Map<String, dynamic> toDbMap() {
     return {
       'id': id,
-      'title': title,
-      'date': date.toIso8601String(),
-      'status': status.value,
-      'checklist_id': checklistId,
-      'checklist_title': checklistTitle,
-      'checklist_code': checklistCode,
+      'title': title ?? checklistTitle ?? '',
+      'checklistId': checklistId ?? '',
+      'checklistTitle': checklistTitle ?? '',
+      'checklistCode': checklistCode ?? '',
+      'checklistCategory': checklistCategory,
+      'status': status.name,
+      'createdAt': createdAt.toIso8601String(),
+      'date': createdAt.toIso8601String(),
     };
-  }
-
-  factory InspectionModel.fromDbMap(Map<String, dynamic> map) {
-    return InspectionModel(
-      id: (map['id'] ?? '').toString(),
-      title: (map['title'] ?? '').toString(),
-      date: map['date'] == null
-          ? DateTime.now()
-          : DateTime.tryParse(map['date'].toString()) ?? DateTime.now(),
-      status: InspectionStatusX.fromValue(map['status']?.toString()),
-      checklistId: map['checklist_id']?.toString(),
-      checklistTitle: map['checklist_title']?.toString(),
-      checklistCode: map['checklist_code']?.toString(),
-    );
   }
 
   InspectionModel copyWith({
     String? id,
     String? title,
-    DateTime? date,
-    InspectionStatus? status,
     String? checklistId,
     String? checklistTitle,
     String? checklistCode,
+    String? checklistCategory,
+    InspectionStatus? status,
+    DateTime? createdAt,
+    List<AnswerModel>? answers,
   }) {
     return InspectionModel(
       id: id ?? this.id,
       title: title ?? this.title,
-      date: date ?? this.date,
-      status: status ?? this.status,
       checklistId: checklistId ?? this.checklistId,
       checklistTitle: checklistTitle ?? this.checklistTitle,
       checklistCode: checklistCode ?? this.checklistCode,
+      checklistCategory: checklistCategory ?? this.checklistCategory,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      answers: answers ?? this.answers,
     );
   }
 }
