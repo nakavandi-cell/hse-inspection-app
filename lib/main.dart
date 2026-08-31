@@ -18,8 +18,8 @@ class HseInspectionApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFFF5F7FA),
-        cardTheme:: 12,
-            vertical:: 2,
+        cardTheme: const CardThemeData(
+          elevation: 2,
           margin: EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 6,
@@ -32,10 +32,10 @@ class HseInspectionApp extends StatelessWidget {
 }
 
 class ChecklistHomePage extends StatelessWidget {
-  const Checklist List<String> categories = SeedLoader.categories;
+  const ChecklistHomePage({super.key});
 
-    return Directionality(
-      text) {
+  @override
+  Widget build(BuildContext context) {
     final List<String> categories = SeedLoader.categories;
 
     return Directionality(
@@ -69,16 +69,20 @@ class ChecklistHomePage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      subtitle: Text('${checklists.length} چک‌لیست'),
-                      children: checklists.map<Widget>((ChecklistItem checklist) {
+                      subtitle: Text(
+                        '${checklists.length} چک‌لیست',
+                      ),
+                      children: checklists
+                          .map<Widget>((ChecklistItem checklist) {
                         return ListTile(
                           leading: const Icon(
                             Icons.checklist,
                             color: Colors.green,
-                          ),
-                          title: Text(checklist.title),
-                          subtitle: Text(checklist.code),
-                          trailing: const Icon(
+                         (
+                          leading: const Icon(
+                            Icons.checklist,
+                            color: Colors.green,
+                         : const Icon(
                             Icons.arrow_back_ios,
                             size: 16,
                           ),
@@ -106,57 +110,60 @@ class ChecklistHomePage extends StatelessWidget {
 }
 
 class ChecklistPreviewPage extends StatelessWidget {
-  final ChecklistItem checklist checklist;
+  final ChecklistItem checklist;
 
-  constPreviewPage({
+  const ChecklistPreviewPage({
     super.key,
     required this.checklist,
   });
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> sectionWidgets = checklist.sections
-        .asMap()
-        .entries
-        .map<Widget>((MapEntry<int, ChecklistSection> entry) {
-      final int sectionNumber = entry.key + 1;
-      final ChecklistSection section = entry.value;
+    final List<Widget> sectionWidgets = <Widget>[];
 
-      final List<Widget> questionWidgets = section.questions
-          .asMap()
-          .entries
-          .map<Widget>((MapEntry<int, String> questionEntry) {
-        final int questionNumber = questionEntry.key + 1;
-        final String question = questionEntry.value;
+    for (int sectionIndex = 0;
+        sectionIndex < checklist.sections.length;
+        sectionIndex++) {
+      final ChecklistSection section = checklist.sections[sectionIndex];
+      final List<Widget> questionWidgets = <Widget>[];
 
-        return ListTile(
-          leading: CircleAvatar(
-            radius: 14,
-            child: Text(
-              '$questionNumber',
-              style: const TextStyle(fontSize: 12),
+      for (int questionIndex = 0;
+          questionIndex < section.questions.length;
+          questionIndex++) {
+        final String question = section.questions[questionIndex];
+
+        questionWidgets.add(
+          ListTile(
+            leading: CircleAvatar(
+              radius: 14,
+              child: Text(
+                '${questionIndex + 1}',
+                style: const TextStyle(fontSize: 12),
+              ),
             ),
-          ),
-          title: Text(question),
-          trailing: const Icon(
-            Icons.radio_button_unchecked,
+            title: Text(question),
+            trailing: const Icon(
+              Icons.radio_button_unchecked,
+            ),
           ),
         );
-      }).toList();
+      }
 
-      return Card(
-        child: ExpansionTile(
-          initiallyExpanded: true,
-          title: Text(
-            '$sectionNumber. ${section.title}',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+      sectionWidgets.add(
+        Card(
+          child: ExpansionTile(
+            initiallyExpanded: true,
+            title: Text(
+              '${sectionIndex + 1}. ${section.title}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            children: questionWidgets,
           ),
-          children: questionWidgets,
         ),
       );
-    }).toList();
+    }
 
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -178,8 +185,12 @@ class ChecklistPreviewPage extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
-                    Text('کد چک‌لیست: ${checklist.code}'),
-                    Text('دسته‌بندی: ${checklist.category}'),
+                    Text(
+                      'کد چک‌لیست: ${checklist.code}',
+                    ),
+                    Text(
+                      'دسته‌بندی: ${checklist.category}',
+                    ),
                   ],
                 ),
               ),
