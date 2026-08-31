@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'services/seed_loader.dart';
 
 void main() {
@@ -78,11 +77,10 @@ class ChecklistHomePage extends StatelessWidget {
                           leading: const Icon(
                             Icons.checklist,
                             color: Colors.green,
-                         (
-                          leading: const Icon(
-                            Icons.checklist,
-                            color: Colors.green,
-                         : const Icon(
+                          ),
+                          title: Text(checklist.title),
+                          subtitle: Text(checklist.code),
+                          trailing: const Icon(
                             Icons.arrow_back_ios,
                             size: 16,
                           ),
